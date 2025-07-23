@@ -43,8 +43,6 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({ onDayPress }) => {
 
   const days = generateLast7Days();
 
-  console.log(JSON.stringify(days, null, 2));
-
   return (
     <View style={styles.container}>
       <ThemedText style={styles.title}>{t("thisWeek")}</ThemedText>

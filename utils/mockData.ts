@@ -20,6 +20,10 @@ export interface UserData {
   recentLogs: DrinkLog[];
   drinks: { [date: string]: DrinkLog[] };
   dailyHealthScores: { [date: string]: number };
+  preferred: {
+    drinkType: number;
+    drinkOption: number;
+  };
 }
 
 const generateRandomHealthScore = () => {
@@ -174,6 +178,10 @@ export const mockUserData: UserData = {
   recentLogs: getRecentLogs(generatedDrinks),
   drinks: generatedDrinks,
   dailyHealthScores: generatedHealthScores,
+  preferred: {
+    drinkType: 0,
+    drinkOption: 2,
+  },
 };
 
 // Helper functions
@@ -230,4 +238,29 @@ export const getDaysSinceLastDrink = (lastDrinkDate: string | null): number => {
   const lastDrink = new Date(lastDrinkDate);
   const diffInHours = Math.floor((now.getTime() - lastDrink.getTime()) / (1000 * 60 * 60));
   return Math.floor(diffInHours / 24);
+};
+
+export const getQuickAddButtonText = (userData: UserData): { text: string; mode: 'normal' | 'lastNight' } => {
+  const hour = new Date().getHours();
+  const language = getDeviceLanguage();
+  
+  if (hour >= 16 && hour < 2) {
+    // 4 PM to 2 AM: show preferred drink
+    return {
+      text: `Add ${userData.preferred.drinkOption} ${userData.preferred.drinkType}`,
+      mode: 'normal'
+    };
+  } else if (hour >= 2 && hour < 11) {
+    // 2 AM to 11 AM: show "add last night drinks"
+    return {
+      text: getTranslation('addLastNightDrinks', language),
+      mode: 'lastNight'
+    };
+  } else {
+    // 11 AM to 4 PM: show "add drink"
+    return {
+      text: getTranslation('addDrink', language),
+      mode: 'normal'
+    };
+  }
 }; 

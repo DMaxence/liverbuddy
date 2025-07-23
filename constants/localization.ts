@@ -79,6 +79,10 @@ export const translations = {
     hoursAgo: "hours ago",
     yesterday: "Yesterday",
     
+    // Quick Add Button
+    addDrink: "Add drink",
+    addLastNightDrinks: "Add last night drinks",
+    
     // Liver States
     perfectlyHealthy: "Perfectly Healthy",
     kindaVibing: "Kinda Vibing", 
@@ -154,6 +158,10 @@ export const translations = {
     hourAgo: "heure",
     hoursAgo: "heures",
     yesterday: "Hier",
+    
+    // Quick Add Button
+    addDrink: "Ajouter une boisson",
+    addLastNightDrinks: "Ajouter les boissons d'hier soir",
     
     // Liver States
     perfectlyHealthy: "Parfaitement Sain",

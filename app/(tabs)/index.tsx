@@ -20,7 +20,7 @@ import {
   formatRelativeTime,
   formatTime,
   getDaysSinceLastDrink,
-  getGreeting,
+  getQuickAddButtonText,
   mockUserData,
 } from "@/utils/mockData";
 
@@ -37,15 +37,17 @@ const liverImages = {
 
 export default function HomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState<"normal" | "lastNight">("normal");
   const userData = mockUserData;
   const liverState = getLiverStateByScore(userData.healthScore);
   const progressPercentage = (userData.healthScore / 100) * 100;
   const daysSinceLastDrink = getDaysSinceLastDrink(userData.lastDrinkDate);
-  const greeting = getGreeting();
   const currentDate = formatDate(new Date());
   const { t } = useTranslation();
 
   const handleLogDrink = () => {
+    const { mode } = getQuickAddButtonText(userData);
+    setModalMode(mode);
     setIsModalVisible(true);
   };
 
@@ -77,8 +79,6 @@ export default function HomeScreen() {
     // TODO: Navigate to settings
     console.log("Settings pressed");
   };
-
-  console.log(greeting);
 
   return (
     <ThemedView style={styles.container}>
@@ -154,6 +154,16 @@ export default function HomeScreen() {
           </View>
         </ThemedView>
 
+        {/* Quick add button */}
+        <TouchableOpacity
+          style={styles.quickAddButton}
+          onPress={handleLogDrink}
+        >
+          <ThemedText style={styles.quickAddButtonText}>
+            {getQuickAddButtonText(userData).text}
+          </ThemedText>
+        </TouchableOpacity>
+
         {/* Recent Logs */}
         <View style={styles.logsSection}>
           <ThemedText style={styles.logsTitle}>{t("recentLogs")}</ThemedText>
@@ -208,6 +218,7 @@ export default function HomeScreen() {
         visible={isModalVisible}
         onClose={handleCloseModal}
         onLogDrink={handleDrinkLogged}
+        initialMode={modalMode}
       />
     </ThemedView>
   );
@@ -394,5 +405,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     textAlign: "center",
+  },
+  quickAddButton: {
+    backgroundColor: "#4CAF50",
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  quickAddButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
   },
 });

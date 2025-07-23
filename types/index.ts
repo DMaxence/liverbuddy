@@ -103,3 +103,12 @@ export interface UserBadge {
 }
 
 export type AppLanguage = "en" | "fr";
+
+export interface DrinkType {
+  id: string;
+  name: string;
+  emoji: string;
+  defaultAmount: number;
+  defaultUnit: string;
+  options: { amount: number; unit: string; label: string }[];
+}

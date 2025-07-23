@@ -17,88 +17,10 @@ import { ThemedView } from "./ThemedView";
 // import { DateTimePicker } from "@expo/ui/swift-ui";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
+import { DrinkType } from "@/types";
+import { getDrinkTypes } from "@/utils";
+import { mockUserData } from "@/utils/mockData";
 import { Slider } from "@expo/ui/swift-ui";
-
-export interface DrinkType {
-  id: string;
-  name: string;
-  emoji: string;
-  defaultAmount: number;
-  defaultUnit: string;
-  options: { amount: number; unit: string; label: string }[];
-}
-
-const getDrinkTypes = (t: any): DrinkType[] => [
-  {
-    id: "beer",
-    name: t("beer"),
-    emoji: "🍺",
-    defaultAmount: 330,
-    defaultUnit: "mL",
-    options: [
-      { amount: 330, unit: "mL", label: `${t("can")} (330mL)` },
-      { amount: 500, unit: "mL", label: `${t("bottle")} (500mL)` },
-      { amount: 473, unit: "mL", label: `${t("pint")} (473mL)` },
-      { amount: 1, unit: "L", label: `${t("large")} (1L)` },
-    ],
-  },
-  {
-    id: "wine",
-    name: t("wine"),
-    emoji: "🍷",
-    defaultAmount: 5,
-    defaultUnit: "oz",
-    options: [
-      { amount: 5, unit: "oz", label: `${t("glass")} (5oz)` },
-      { amount: 6, unit: "oz", label: `${t("largeGlass")} (6oz)` },
-      { amount: 750, unit: "mL", label: `${t("bottle")} (750mL)` },
-    ],
-  },
-  {
-    id: "cocktail",
-    name: t("cocktail"),
-    emoji: "🍸",
-    defaultAmount: 1,
-    defaultUnit: "drink",
-    options: [
-      { amount: 1, unit: "drink", label: `${t("standard")} (1 ${t("drink")})` },
-      {
-        amount: 1.5,
-        unit: "drink",
-        label: `${t("strong")} (1.5 ${t("drinks")})`,
-      },
-      { amount: 2, unit: "drink", label: `${t("double")} (2 ${t("drinks")})` },
-    ],
-  },
-  {
-    id: "spirits",
-    name: t("spirits"),
-    emoji: "🥃",
-    defaultAmount: 1.5,
-    defaultUnit: "oz",
-    options: [
-      { amount: 1, unit: "oz", label: `${t("shot")} (1oz)` },
-      { amount: 1.5, unit: "oz", label: `${t("standard")} (1.5oz)` },
-      { amount: 2, unit: "oz", label: `${t("double")} (2oz)` },
-    ],
-  },
-  {
-    id: "other",
-    name: t("other"),
-    emoji: "🥤",
-    defaultAmount: 1,
-    defaultUnit: "drink",
-    options: [
-      { amount: 1, unit: "drink", label: `${t("standard")} (1 ${t("drink")})` },
-      {
-        amount: 1.5,
-        unit: "drink",
-        label: `${t("strong")} (1.5 ${t("drinks")})`,
-      },
-      { amount: 2, unit: "drink", label: `${t("double")} (2 ${t("drinks")})` },
-    ],
-  },
-];
 
 interface NewDrinkModalProps {
   visible: boolean;
@@ -112,6 +34,7 @@ interface NewDrinkModalProps {
     timestamp?: Date;
     isApproximate?: boolean;
   }) => void;
+  initialMode?: "normal" | "lastNight";
 }
 
 // Custom Slider Component
@@ -158,14 +81,20 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
   visible,
   onClose,
   onLogDrink,
+  initialMode = "normal",
 }) => {
   const { t } = useTranslation();
   const drinkTypes = getDrinkTypes(t);
 
-  const [selectedType, setSelectedType] = useState<DrinkType>(drinkTypes[0]);
-  const [selectedOption, setSelectedOption] = useState(
-    drinkTypes[0].options[0]
+  const [selectedType, setSelectedType] = useState<DrinkType>(
+    drinkTypes[mockUserData.preferred.drinkType]
   );
+  const [selectedOption, setSelectedOption] = useState(
+    drinkTypes[mockUserData.preferred.drinkType].options[
+      mockUserData.preferred.drinkOption
+    ]
+  );
+  console.log(selectedOption);
   const [customAmount, setCustomAmount] = useState("");
   const [customUnit, setCustomUnit] = useState("");
   const [useCustomTime, setUseCustomTime] = useState(false);
@@ -177,7 +106,7 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
 
   // New state for Last Night mode
   const [timeMode, setTimeMode] = useState<"now" | "earlier" | "lastNight">(
-    "now"
+    initialMode === "lastNight" ? "lastNight" : "now"
   );
   const [sliderValue, setSliderValue] = useState(0);
   const [isUncertain, setIsUncertain] = useState(false);
@@ -205,6 +134,13 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
       setCanHandleTimeSelection(false);
     }
   }, [showTimePicker]);
+
+  // Reset mode when modal opens
+  useEffect(() => {
+    if (visible) {
+      setTimeMode(initialMode === "lastNight" ? "lastNight" : "now");
+    }
+  }, [visible, initialMode]);
 
   const handleTypeSelect = (type: DrinkType) => {
     setSelectedType(type);
@@ -263,8 +199,12 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
     }
 
     // Reset form
-    setSelectedType(drinkTypes[0]);
-    setSelectedOption(drinkTypes[0].options[0]);
+    setSelectedType(drinkTypes[mockUserData.preferred.drinkType]);
+    setSelectedOption(
+      drinkTypes[mockUserData.preferred.drinkType].options[
+        mockUserData.preferred.drinkOption
+      ]
+    );
     setCustomAmount("");
     setCustomUnit("");
     setUseCustomTime(false);
@@ -281,8 +221,12 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
 
   const handleCancel = () => {
     // Reset form
-    setSelectedType(drinkTypes[0]);
-    setSelectedOption(drinkTypes[0].options[0]);
+    setSelectedType(drinkTypes[mockUserData.preferred.drinkType]);
+    setSelectedOption(
+      drinkTypes[mockUserData.preferred.drinkType].options[
+        mockUserData.preferred.drinkOption
+      ]
+    );
     setCustomAmount("");
     setCustomUnit("");
     setUseCustomTime(false);
@@ -635,6 +579,7 @@ const styles = StyleSheet.create({
   },
   typeScrollContainer: {
     paddingHorizontal: 4,
+    paddingVertical: 4,
   },
   typePill: {
     backgroundColor: "#F8F8F8",
