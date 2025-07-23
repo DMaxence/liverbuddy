@@ -13,12 +13,10 @@ import {
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 
-// Import Expo UI DateTimePicker
-// import { DateTimePicker } from "@expo/ui/swift-ui";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-import { DrinkType } from "@/types";
-import { getDrinkTypes } from "@/utils";
+import { DrinkOption, DrinkType } from "@/types";
+import { formatDrinkOption, getDrinkTypes } from "@/utils";
 import { mockUserData } from "@/utils/mockData";
 import { Slider } from "@expo/ui/swift-ui";
 
@@ -84,17 +82,33 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
   initialMode = "normal",
 }) => {
   const { t } = useTranslation();
-  const drinkTypes = getDrinkTypes(t);
+  const drinkTypes = getDrinkTypes((key: string) => t(key as any));
+
+  // Find the selected drink type by key
+  const getSelectedDrinkType = () => {
+    return (
+      drinkTypes.find(
+        (type) => type.id === mockUserData.preferred_drink_type
+      ) || drinkTypes[0]
+    );
+  };
 
   const [selectedType, setSelectedType] = useState<DrinkType>(
-    drinkTypes[mockUserData.preferred.drinkType]
+    getSelectedDrinkType()
   );
-  const [selectedOption, setSelectedOption] = useState(
-    drinkTypes[mockUserData.preferred.drinkType].options[
-      mockUserData.preferred.drinkOption
-    ]
-  );
-  console.log(selectedOption);
+
+  // Find the selected option by key
+  const getSelectedOption = () => {
+    const type = getSelectedDrinkType();
+    return (
+      type.options.find(
+        (option) => option.key === mockUserData.preferred_drink_option
+      ) || type.options[0]
+    );
+  };
+
+  const [selectedOption, setSelectedOption] = useState(getSelectedOption());
+  const [drinkName, setDrinkName] = useState(mockUserData.favorite_drink || "");
   const [customAmount, setCustomAmount] = useState("");
   const [customUnit, setCustomUnit] = useState("");
   const [useCustomTime, setUseCustomTime] = useState(false);
@@ -149,11 +163,7 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
     setCustomUnit("");
   };
 
-  const handleOptionSelect = (option: {
-    amount: number;
-    unit: string;
-    label: string;
-  }) => {
+  const handleOptionSelect = (option: DrinkOption) => {
     setSelectedOption(option);
     setCustomAmount("");
     setCustomUnit("");
@@ -189,7 +199,7 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
 
       onLogDrink({
         type: selectedType.id,
-        name: selectedType.name,
+        name: drinkName || t(selectedType.name_key as any),
         amount,
         unit,
         emoji: selectedType.emoji,
@@ -199,12 +209,8 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
     }
 
     // Reset form
-    setSelectedType(drinkTypes[mockUserData.preferred.drinkType]);
-    setSelectedOption(
-      drinkTypes[mockUserData.preferred.drinkType].options[
-        mockUserData.preferred.drinkOption
-      ]
-    );
+    setSelectedType(getSelectedDrinkType());
+    setSelectedOption(getSelectedOption());
     setCustomAmount("");
     setCustomUnit("");
     setUseCustomTime(false);
@@ -221,12 +227,9 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
 
   const handleCancel = () => {
     // Reset form
-    setSelectedType(drinkTypes[mockUserData.preferred.drinkType]);
-    setSelectedOption(
-      drinkTypes[mockUserData.preferred.drinkType].options[
-        mockUserData.preferred.drinkOption
-      ]
-    );
+    setSelectedType(getSelectedDrinkType());
+    setSelectedOption(getSelectedOption());
+    setDrinkName(mockUserData.favorite_drink || "");
     setCustomAmount("");
     setCustomUnit("");
     setUseCustomTime(false);
@@ -373,11 +376,25 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
                             styles.selectedTypeName,
                         ]}
                       >
-                        {type.name}
+                        {t(type.name_key as any)}
                       </ThemedText>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
+              </View>
+
+              {/* Drink Name Input */}
+              <View style={styles.section}>
+                <ThemedText style={styles.sectionTitle}>
+                  {t("drinkName")}
+                </ThemedText>
+                <TextInput
+                  style={styles.drinkNameInput}
+                  placeholder={t("drinkNamePlaceholder")}
+                  value={drinkName}
+                  onChangeText={setDrinkName}
+                  placeholderTextColor="#999"
+                />
               </View>
 
               {/* Amount Selector */}
@@ -405,7 +422,9 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
                             styles.selectedPresetText,
                         ]}
                       >
-                        {option.label}
+                        {formatDrinkOption(option, (key: string) =>
+                          t(key as any)
+                        )}
                       </ThemedText>
                     </TouchableOpacity>
                   ))}
@@ -669,6 +688,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E0E0E0",
     textAlign: "center",
+  },
+  drinkNameInput: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    textAlign: "left",
   },
   timeContainer: {
     flexDirection: "row",
