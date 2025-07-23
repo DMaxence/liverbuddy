@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import { LiverState, liverStates } from "@/types";
 
 export const getLiverStateByScore = (score: number): LiverState => {
@@ -6,4 +7,36 @@ export const getLiverStateByScore = (score: number): LiverState => {
       (state) => score >= state.scoreRange[0] && score <= state.scoreRange[1]
     ) || liverStates[liverStates.length - 1]
   );
+};
+
+export const getDayBackgroundColor = (liverState: number): string => {
+  switch (liverState) {
+    case 1:
+    case 2:
+      return Colors.light.good.background;
+    case 3:
+    case 4:
+      return Colors.light.medium.background;
+    case 5:
+    case 6:
+      return Colors.light.bad.background;
+    default:
+      return Colors.light.background;
+  }
+};
+
+export const getDotColor = (liverState: number): string => {
+  switch (liverState) {
+    case 1:
+    case 2:
+      return Colors.light.good.color;
+    case 3:
+    case 4:
+      return Colors.light.medium.color;
+    case 5:
+    case 6:
+      return Colors.light.bad.color;
+    default:
+      return Colors.light.background;
+  }
 };

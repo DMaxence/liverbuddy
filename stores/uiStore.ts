@@ -15,7 +15,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
   persist(
     (set) => ({
       // Initial state
-      language: "en",
+      language: "fr",
 
       // Actions
       setLanguage: (language) => set({ language }),
