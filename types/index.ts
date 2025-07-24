@@ -113,7 +113,7 @@ export const UNIT_CONVERSIONS = {
   ml: { to_ml: 1, to_oz: 0.033814 },
   oz: { to_ml: 29.5735, to_oz: 1 },
   l: { to_ml: 1000, to_oz: 33.814 },
-  drink: { to_ml: 0, to_oz: 0 }, // Special unit for cocktails/drinks
+  drink: { to_ml: 200, to_oz: 6.76 }, // Standard drink = 200ml (6.76 oz)
 } as const;
 
 export type UnitType = keyof typeof UNIT_CONVERSIONS;

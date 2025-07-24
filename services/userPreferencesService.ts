@@ -1,7 +1,8 @@
 import { db } from "@/lib/database";
 import { userPreferences } from "@/lib/database/schema";
-import { eq } from "drizzle-orm";
 import { DrinkOptionKey, DrinkTypeKey, PreferredUnit } from "@/types";
+import { eq } from "drizzle-orm";
+import * as Crypto from "expo-crypto";
 
 export interface UserPreferences {
   preferred_drink_type: DrinkTypeKey;
@@ -70,7 +71,7 @@ export const upsertUserPreferences = async (
     } else {
       // Create new preferences
       const newPrefs = {
-        id: crypto.randomUUID(),
+        id: Crypto.randomUUID(),
         user_id: userId,
         preferred_drink_type: preferences.preferred_drink_type || "beer",
         preferred_drink_option: preferences.preferred_drink_option || "can",

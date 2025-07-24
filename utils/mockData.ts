@@ -1,6 +1,8 @@
 import { getDeviceLanguage, getTranslation } from "@/constants/localization";
+import { UserData } from "@/services/userDataService";
 
 import { DrinkOptionKey, DrinkTypeKey } from "@/types";
+import { getDrinkTypeEmoji } from "./drinks";
 
 export interface DrinkLog {
   id: string;
@@ -12,20 +14,20 @@ export interface DrinkLog {
   emoji: string;
 }
 
-export interface UserData {
-  id: string;
-  name: string;
-  healthScore: number;
-  lastDrinkDate: string | null;
-  weeklyGoal: number;
-  weeklyDrinks: number;
-  recentLogs: DrinkLog[];
-  drinks: { [date: string]: DrinkLog[] };
-  dailyHealthScores: { [date: string]: number };
-  preferred_drink_type: DrinkTypeKey;
-  preferred_drink_option: DrinkOptionKey;
-  favorite_drink?: string; // User's favorite drink name
-}
+// export interface UserData {
+//   id: string;
+//   name: string;
+//   healthScore: number;
+//   lastDrinkDate: string | null;
+//   weeklyGoal: number;
+//   weeklyDrinks: number;
+//   recentLogs: DrinkLog[];
+//   drinks: { [date: string]: DrinkLog[] };
+//   dailyHealthScores: { [date: string]: number };
+//   preferred_drink_type: DrinkTypeKey;
+//   preferred_drink_option: DrinkOptionKey;
+//   favorite_drink?: string; // User's favorite drink name
+// }
 
 const generateRandomHealthScore = () => {
   return Math.floor(Math.random() * 100);
@@ -338,32 +340,35 @@ export const formatTime = (timestamp: string, lang?: string): string => {
 
 export const getDaysSinceLastDrink = (lastDrinkDate: string | null): number => {
   if (!lastDrinkDate) return 0;
+
   const now = new Date();
   const lastDrink = new Date(lastDrinkDate);
-  const diffInHours = Math.floor(
-    (now.getTime() - lastDrink.getTime()) / (1000 * 60 * 60)
+
+  // Get local dates (year, month, day) to compare only the date part
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const lastDrinkLocalDate = new Date(
+    lastDrink.getFullYear(),
+    lastDrink.getMonth(),
+    lastDrink.getDate()
   );
-  return Math.floor(diffInHours / 24);
+
+  // Calculate difference in days
+  const diffInMs = nowDate.getTime() - lastDrinkLocalDate.getTime();
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+  return diffInDays;
 };
 
 export const getQuickAddButtonText = (
-  userData: UserData
+  userData: UserData | null
 ): { text: string; mode: "normal" | "lastNight" } => {
   const hour = new Date().getHours();
   const language = getDeviceLanguage();
 
-  if (hour >= 16 && hour < 2) {
-    // 4 PM to 2 AM: show preferred drink
-    const drinkTypeName = getTranslation(
-      userData.preferred.drinkType,
-      language
-    );
-    const drinkOptionName = getTranslation(
-      userData.preferred.drinkOption,
-      language
-    );
+  if (hour >= 11 && hour < 16) {
+    // 11 AM to 4 PM: show "add drink"
     return {
-      text: `Add ${drinkOptionName} ${drinkTypeName}`,
+      text: getTranslation("addDrink", language),
       mode: "normal",
     };
   } else if (hour >= 2 && hour < 11) {
@@ -373,9 +378,26 @@ export const getQuickAddButtonText = (
       mode: "lastNight",
     };
   } else {
-    // 11 AM to 4 PM: show "add drink"
+    // 4 PM to 2 AM: show preferred drink
+    const drinkTypeName = getTranslation(
+      userData?.preferred_drink_type || "beer",
+      language
+    );
+    const drinkOptionName = getTranslation(
+      userData?.preferred_drink_option || "can",
+      language
+    );
+    const drinkEmoji = getDrinkTypeEmoji(
+      userData?.preferred_drink_type || "beer"
+    );
     return {
-      text: getTranslation("addDrink", language),
+      text: `${getTranslation(
+        "add",
+        language
+      )} ${drinkOptionName.toLowerCase()} ${getTranslation(
+        "of",
+        language
+      )} ${drinkTypeName.toLowerCase()} ${drinkEmoji}`,
       mode: "normal",
     };
   }

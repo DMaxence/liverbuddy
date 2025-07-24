@@ -23,7 +23,7 @@ export const userPreferences = sqliteTable("user_preferences", {
   user_id: text("user_id").notNull().unique(),
   preferred_drink_type: text("preferred_drink_type", {
     enum: ["beer", "wine", "cocktail", "spirits", "other"],
-  }).notNull(),
+  }).default("beer"),
   preferred_drink_option: text("preferred_drink_option", {
     enum: [
       "can",
@@ -41,7 +41,7 @@ export const userPreferences = sqliteTable("user_preferences", {
       "medium",
       "extra_large",
     ],
-  }).notNull(),
+  }).default("can"),
   favorite_drink: text("favorite_drink"), // User's favorite drink name
   preferred_unit: text("preferred_unit", { enum: ["ml", "oz"] }).default("ml"),
   weekly_goal: integer("weekly_goal").default(7),

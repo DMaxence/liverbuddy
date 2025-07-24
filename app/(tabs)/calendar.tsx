@@ -4,15 +4,24 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useUser } from "@/hooks/useUser";
+import { DrinkLog } from "@/lib/database/schema";
 import { getDayBackgroundColor, getLiverStateByScore } from "@/utils";
-import { DrinkLog, mockUserData } from "@/utils/mockData";
+import { formatDrinkAmount } from "@/utils/formatDrinkAmount";
 import {
   BottomSheetBackdrop,
-  BottomSheetSectionList,
   BottomSheetModal,
+  BottomSheetSectionList,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Image,
   ScrollView,
@@ -51,9 +60,51 @@ interface MonthlySummary {
 export default function CalendarScreen() {
   const colorScheme = useColorScheme();
   const { t, language } = useTranslation();
+  const { userData, isLoading } = useUser("local-user");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const { date } = useLocalSearchParams();
+
+  // Handle date parameter from search params
+  useEffect(() => {
+    if (date && typeof date === "string" && userData) {
+      try {
+        const parsedDate = new Date(date);
+        if (!isNaN(parsedDate.getTime())) {
+          // Set current month to the date's month
+          setCurrentDate(
+            new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1)
+          );
+
+          // Find the day in the month data and open bottom sheet
+          const monthData = getMonthData(
+            new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1)
+          );
+          const targetDay = monthData.find(
+            (day) => day.date.toDateString() === parsedDate.toDateString()
+          );
+
+          if (targetDay) {
+            setSelectedDay(targetDay);
+            // Use setTimeout to ensure the component is fully rendered
+            setTimeout(() => {
+              bottomSheetRef.current?.present();
+            }, 100);
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing date parameter:", error);
+      }
+    }
+  }, [date, userData]);
+
+  useEffect(() => {
+    return () => {
+      router.setParams({ date: undefined });
+    };
+  }, [date]);
 
   // Bottom sheet ref and snap points
   const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -96,6 +147,8 @@ export default function CalendarScreen() {
   const today = new Date();
 
   const getMonthData = (date: Date): CalendarDay[] => {
+    if (!userData) return [];
+
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
@@ -119,11 +172,12 @@ export default function CalendarScreen() {
       const currentDate = new Date(startDate);
       currentDate.setDate(startDate.getDate() + i);
 
-      const dateString = currentDate.toISOString().split("T")[0];
-      const drinks = mockUserData.drinks[dateString] || [];
+      const dateString = `${currentDate.getFullYear()}-${String(
+        currentDate.getMonth() + 1
+      ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
+      const drinks = userData.drinks[dateString] || [];
 
-      // Get health score for this day (default to 100 if no data)
-      const healthScore = mockUserData.dailyHealthScores[dateString] || 100;
+      const healthScore = userData.dailyHealthScores[dateString] || 100;
       const liverState = getLiverStateByScore(healthScore);
 
       days.push({
@@ -141,6 +195,15 @@ export default function CalendarScreen() {
   };
 
   const getMonthlySummary = (date: Date): MonthlySummary => {
+    if (!userData) {
+      return {
+        totalDrinks: 0,
+        averagePerDay: 0,
+        worstDay: { date: "", drinks: 0 },
+        topDrinkType: { type: "None", count: 0 },
+      };
+    }
+
     const year = date.getFullYear();
     const month = date.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -155,7 +218,7 @@ export default function CalendarScreen() {
         2,
         "0"
       )}-${String(day).padStart(2, "0")}`;
-      const drinks = mockUserData.drinks[dateString] || [];
+      const drinks = userData.drinks[dateString] || [];
 
       if (drinks.length > 0) {
         totalDrinks += drinks.length;
@@ -166,7 +229,8 @@ export default function CalendarScreen() {
         }
 
         drinks.forEach((drink) => {
-          drinkTypeCount[drink.type] = (drinkTypeCount[drink.type] || 0) + 1;
+          drinkTypeCount[drink.drink_type] =
+            (drinkTypeCount[drink.drink_type] || 0) + 1;
         });
       }
     }
@@ -185,8 +249,6 @@ export default function CalendarScreen() {
       topDrinkType: { type: topDrinkType[0], count: topDrinkType[1] },
     };
   };
-
-  
 
   const navigateMonth = (direction: "prev" | "next") => {
     const newDate = new Date(currentDate);
@@ -232,6 +294,19 @@ export default function CalendarScreen() {
   const weeksToDisplay = monthData.slice(-7).every((day) => !day.isCurrentMonth)
     ? 5
     : 6;
+
+  if (isLoading) {
+    return (
+      <ThemedView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ThemedText style={styles.loadingText}>
+            {t("loadingCalendar")}
+          </ThemedText>
+        </View>
+      </ThemedView>
+    );
+  }
+
   return (
     <ThemedView style={styles.container}>
       <ScrollView
@@ -240,7 +315,7 @@ export default function CalendarScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <ThemedText style={styles.title}>Drinking Calendar</ThemedText>
+          <ThemedText style={styles.title}>{t("drinkingCalendar")}</ThemedText>
           <View style={styles.monthNavigator}>
             <TouchableOpacity
               style={styles.navButton}
@@ -341,46 +416,52 @@ export default function CalendarScreen() {
 
         {/* Monthly Summary Cards */}
         <View style={styles.summaryContainer}>
-          <ThemedText style={styles.summaryTitle}>Monthly Summary</ThemedText>
+          <ThemedText style={styles.summaryTitle}>
+            {t("monthlySummary")}
+          </ThemedText>
           <View style={styles.summaryGrid}>
             <View style={styles.summaryCard}>
               <ThemedText style={styles.summaryEmoji}>🍺</ThemedText>
-              <ThemedText style={styles.summaryLabel}>Total drinks</ThemedText>
+              <ThemedText style={styles.summaryLabel}>
+                {t("totalDrinks")}
+              </ThemedText>
               <ThemedText style={styles.summaryValue}>
-                {summary.totalDrinks} drinks
+                {summary.totalDrinks} {t("drinks")}
               </ThemedText>
             </View>
 
             <View style={styles.summaryCard}>
               <ThemedText style={styles.summaryEmoji}>📊</ThemedText>
               <ThemedText style={styles.summaryLabel}>
-                Average per day
+                {t("averagePerDay")}
               </ThemedText>
               <ThemedText style={styles.summaryValue}>
-                {summary.averagePerDay} drinks
+                {summary.averagePerDay} {t("drinks")}
               </ThemedText>
             </View>
 
             <View style={styles.summaryCard}>
               <ThemedText style={styles.summaryEmoji}>🫠</ThemedText>
-              <ThemedText style={styles.summaryLabel}>Worst day</ThemedText>
+              <ThemedText style={styles.summaryLabel}>
+                {t("worstDay")}
+              </ThemedText>
               <ThemedText style={styles.summaryValue}>
                 {summary.worstDay.date
                   ? formatDate(summary.worstDay.date)
-                  : "None"}
+                  : t("never")}
               </ThemedText>
             </View>
 
             <View style={styles.summaryCard}>
               <ThemedText style={styles.summaryEmoji}>🍷</ThemedText>
               <ThemedText style={styles.summaryLabel}>
-                Top drink type
+                {t("topDrinkType")}
               </ThemedText>
               <ThemedText style={styles.summaryValue}>
                 {summary.topDrinkType.type
                   ? summary.topDrinkType.type.charAt(0).toUpperCase() +
                     summary.topDrinkType.type.slice(1)
-                  : "None"}{" "}
+                  : t("never")}{" "}
                 – {summary.topDrinkType.count}
               </ThemedText>
             </View>
@@ -409,7 +490,7 @@ export default function CalendarScreen() {
           <BottomSheetView style={styles.modalContent}>
             <View style={styles.emptyStateContainer}>
               <ThemedText style={styles.noDrinksText}>
-                No drinks logged for this day! 🧠
+                {t("noDrinksLogged")}
               </ThemedText>
             </View>
           </BottomSheetView>
@@ -425,17 +506,43 @@ export default function CalendarScreen() {
                 </ThemedText>
               </View>
             )}
-            renderItem={({ item }: { item: DrinkLog }) => (
-              <View style={styles.drinkItem}>
-                <ThemedText style={styles.drinkIcon}>{item.emoji}</ThemedText>
-                <View style={styles.drinkDetails}>
-                  <ThemedText style={styles.drinkName}>{item.name}</ThemedText>
-                  <ThemedText style={styles.drinkAmount}>
-                    {item.amount} {item.unit}
+            renderItem={({ item }: { item: DrinkLog }) => {
+              // Get drink type emoji and name
+              const drinkEmojis = {
+                beer: "🍺",
+                wine: "🍷",
+                cocktail: "🍹",
+                spirits: "🥃",
+                other: "🍺",
+              };
+              const drinkNames = {
+                beer: t("beer"),
+                wine: t("wine"),
+                cocktail: t("cocktail"),
+                spirits: t("spirits"),
+                other: t("other"),
+              };
+
+              return (
+                <View style={styles.drinkItem}>
+                  <ThemedText style={styles.drinkIcon}>
+                    {drinkEmojis[item.drink_type] || "🍺"}
                   </ThemedText>
+                  <View style={styles.drinkDetails}>
+                    <ThemedText style={styles.drinkName}>
+                      {item.drink_name || drinkNames[item.drink_type]}
+                    </ThemedText>
+                    <ThemedText style={styles.drinkAmount}>
+                      {formatDrinkAmount(
+                        item.amount_ml,
+                        userData?.preferred_unit || "ml"
+                      )}{" "}
+                      ({item.drink_option})
+                    </ThemedText>
+                  </View>
                 </View>
-              </View>
-            )}
+              );
+            }}
             contentContainerStyle={styles.flatListContent}
             showsVerticalScrollIndicator={true}
             bounces={true}
@@ -680,5 +787,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#11181C",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#666",
   },
 });

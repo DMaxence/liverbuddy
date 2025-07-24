@@ -1,10 +1,10 @@
+import { Colors } from "@/constants/Colors";
 import { useTranslation } from "@/hooks/useTranslation";
-import { mockUserData } from "@/utils/mockData";
+import { useUser } from "@/hooks/useUser";
+import { getDotColor, getLiverStateByScore } from "@/utils";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
-import { getDotColor, getLiverStateByScore } from "@/utils";
-import { Colors } from "@/constants/Colors";
 
 interface MiniCalendarProps {
   onDayPress?: (date: string) => void;
@@ -12,6 +12,7 @@ interface MiniCalendarProps {
 
 export const MiniCalendar: React.FC<MiniCalendarProps> = ({ onDayPress }) => {
   const { t, language } = useTranslation();
+  const { userData } = useUser("local-user");
 
   const generateLast7Days = () => {
     const days = [];
@@ -20,10 +21,12 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({ onDayPress }) => {
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
-      const dateString = date.toISOString().split("T")[0];
+      const dateString = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
-      const isToday = i === 0;
-      const healthScore = mockUserData.dailyHealthScores[dateString] || 100;
+      const isToday = date.toDateString() === today.toDateString();
+      const healthScore = userData?.dailyHealthScores[dateString] || 100;
       const liverState = getLiverStateByScore(healthScore);
 
       days.push({

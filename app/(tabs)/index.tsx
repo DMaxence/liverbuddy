@@ -14,14 +14,17 @@ import { NewDrinkModal } from "@/components/NewDrinkModal";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useUser } from "@/hooks/useUser";
 import { getLiverStateByScore } from "@/utils";
+import { getDrinkTypeEmoji } from "@/utils/drinks";
+import { formatDrinkAmount } from "@/utils/formatDrinkAmount";
 import {
   formatDate,
   formatRelativeTime,
   formatTime,
   getDaysSinceLastDrink,
+  getGreeting,
   getQuickAddButtonText,
-  mockUserData,
 } from "@/utils/mockData";
 
 // Import all liver images statically
@@ -38,10 +41,13 @@ const liverImages = {
 export default function HomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState<"normal" | "lastNight">("normal");
-  const userData = mockUserData;
-  const liverState = getLiverStateByScore(userData.healthScore);
-  const progressPercentage = (userData.healthScore / 100) * 100;
-  const daysSinceLastDrink = getDaysSinceLastDrink(userData.lastDrinkDate);
+  const { userData } = useUser("local-user");
+  const liverState = getLiverStateByScore(userData?.healthScore || 100);
+  const progressPercentage = ((userData?.healthScore || 100) / 100) * 100;
+  const daysSinceLastDrink = getDaysSinceLastDrink(
+    userData?.lastDrinkDate || ""
+  );
+  const greeting = getGreeting();
   const currentDate = formatDate(new Date());
   const { t } = useTranslation();
 
@@ -55,24 +61,9 @@ export default function HomeScreen() {
     setIsModalVisible(false);
   };
 
-  const handleDrinkLogged = (drink: {
-    type: string;
-    name: string;
-    amount: number;
-    unit: string;
-    emoji: string;
-    notes?: string;
-    timestamp?: Date;
-  }) => {
-    // TODO: Add drink to mock data and update health score
-    console.log("Drink logged:", drink);
-    // For now, just close the modal
-    setIsModalVisible(false);
-  };
-
   const handleDayPress = (date: string) => {
     // TODO: Navigate to calendar day view
-    console.log("Day pressed:", date);
+    router.push(`/calendar?date=${date}`);
   };
 
   const handleSettingsPress = () => {
@@ -90,9 +81,7 @@ export default function HomeScreen() {
         <ThemedView style={styles.header}>
           <View style={styles.headerLeft}>
             <ThemedText style={styles.appTitle}>{t("appTitle")}</ThemedText>
-            <ThemedText style={styles.greeting}>
-              {t("hey")} {userData.name},
-            </ThemedText>
+            <ThemedText style={styles.greeting}>{greeting}</ThemedText>
             <ThemedText style={styles.date}>{currentDate}</ThemedText>
           </View>
           <TouchableOpacity
@@ -112,7 +101,7 @@ export default function HomeScreen() {
             resizeMode="contain"
           />
           <ThemedText style={styles.healthScore}>
-            {userData.healthScore}
+            {Math.round(userData?.healthScore || 100)}
           </ThemedText>
           <ThemedView style={styles.progressBarContainer}>
             <View
@@ -138,7 +127,7 @@ export default function HomeScreen() {
           <View style={styles.statItem}>
             <ThemedText style={styles.statLabel}>{t("lastDrink")}</ThemedText>
             <ThemedText style={styles.statValue}>
-              {userData.lastDrinkDate
+              {userData?.lastDrinkDate
                 ? `${daysSinceLastDrink} ${t("daysAgo")}`
                 : t("never")}
             </ThemedText>
@@ -149,7 +138,7 @@ export default function HomeScreen() {
               {t("thisWeeksDrinks")}
             </ThemedText>
             <ThemedText style={styles.statValue}>
-              {userData.weeklyDrinks}/{userData.weeklyGoal}
+              {userData?.weeklyDrinks}/{userData?.weeklyGoal}
             </ThemedText>
           </View>
         </ThemedView>
@@ -167,36 +156,39 @@ export default function HomeScreen() {
         {/* Recent Logs */}
         <View style={styles.logsSection}>
           <ThemedText style={styles.logsTitle}>{t("recentLogs")}</ThemedText>
-          {Object.values(mockUserData.drinks).length > 0 ? (
-            Object.values(mockUserData.drinks)[0]
-              .slice(0, 3)
-              .map((drink, index) => (
-                <TouchableOpacity
-                  key={drink.id}
-                  onPress={() => router.push("/logs")}
-                >
-                  <View style={styles.logItem}>
-                    <View style={styles.logLeft}>
-                      <ThemedText style={styles.logEmoji}>
-                        {drink.emoji}
+          {userData?.recentLogs &&
+          userData?.recentLogs.length &&
+          userData?.recentLogs.length > 0 ? (
+            userData?.recentLogs.map((drink, index) => (
+              <TouchableOpacity
+                key={drink.id}
+                onPress={() => router.push("/logs")}
+              >
+                <View style={styles.logItem}>
+                  <View style={styles.logLeft}>
+                    <ThemedText style={styles.logEmoji}>
+                      {getDrinkTypeEmoji(drink.drink_type)}
+                    </ThemedText>
+                    <View style={styles.logInfo}>
+                      <ThemedText style={styles.logName}>
+                        {drink.drink_name || t(drink.drink_type)} -{" "}
+                        {formatDrinkAmount(
+                          drink.amount_ml,
+                          userData?.preferred_unit || "oz"
+                        )}
                       </ThemedText>
-                      <View style={styles.logInfo}>
-                        <ThemedText style={styles.logName}>
-                          {drink.name} - {drink.amount}
-                          {drink.unit}
-                        </ThemedText>
-                        <ThemedText style={styles.logTime}>
-                          {formatRelativeTime(drink.timestamp)}{" "}
-                          {formatTime(drink.timestamp)}
-                        </ThemedText>
-                      </View>
+                      <ThemedText style={styles.logTime}>
+                        {formatRelativeTime(drink.timestamp)}{" "}
+                        {formatTime(drink.timestamp)}
+                      </ThemedText>
                     </View>
                   </View>
-                  {index < Object.entries(mockUserData.drinks).length - 1 && (
-                    <View style={styles.logDivider} />
-                  )}
-                </TouchableOpacity>
-              ))
+                </View>
+                {index < Object.entries(userData?.drinks || {}).length - 1 && (
+                  <View style={styles.logDivider} />
+                )}
+              </TouchableOpacity>
+            ))
           ) : (
             <View style={styles.emptyState}>
               <ThemedText style={styles.emptyStateText}>
@@ -214,12 +206,14 @@ export default function HomeScreen() {
       <FloatingActionButton onPress={handleLogDrink} />
 
       {/* New Drink Modal */}
-      <NewDrinkModal
-        visible={isModalVisible}
-        onClose={handleCloseModal}
-        onLogDrink={handleDrinkLogged}
-        initialMode={modalMode}
-      />
+      {userData && (
+        <NewDrinkModal
+          userData={userData}
+          visible={isModalVisible}
+          onClose={handleCloseModal}
+          initialMode={modalMode}
+        />
+      )}
     </ThemedView>
   );
 }

@@ -15,24 +15,19 @@ import { ThemedView } from "./ThemedView";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-import { DrinkOption, DrinkType } from "@/types";
+import { DrinkOption, DrinkType, DrinkTypeKey, DrinkOptionKey } from "@/types";
 import { formatDrinkOption, getDrinkTypes } from "@/utils";
-import { mockUserData } from "@/utils/mockData";
+import { convertUnit } from "@/utils/drinks";
+import { createBulkDrinkLogs, createDrinkLog } from "@/services/drinkService";
 import { Slider } from "@expo/ui/swift-ui";
+import { UserData } from "@/services/userDataService";
 
 interface NewDrinkModalProps {
+  userData: UserData;
   visible: boolean;
   onClose: () => void;
-  onLogDrink: (drink: {
-    type: string;
-    name: string;
-    amount: number;
-    unit: string;
-    emoji: string;
-    timestamp?: Date;
-    isApproximate?: boolean;
-  }) => void;
   initialMode?: "normal" | "lastNight";
+  onDrinkLogged?: () => void; // Optional callback to refresh data
 }
 
 // Custom Slider Component
@@ -76,10 +71,11 @@ const getSliderLabel = (value: number): { text: string; emoji: string } => {
 };
 
 export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
+  userData,
   visible,
   onClose,
-  onLogDrink,
   initialMode = "normal",
+  onDrinkLogged,
 }) => {
   const { t } = useTranslation();
   const drinkTypes = getDrinkTypes((key: string) => t(key as any));
@@ -87,9 +83,8 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
   // Find the selected drink type by key
   const getSelectedDrinkType = () => {
     return (
-      drinkTypes.find(
-        (type) => type.id === mockUserData.preferred_drink_type
-      ) || drinkTypes[0]
+      drinkTypes.find((type) => type.id === userData.preferred_drink_type) ||
+      drinkTypes[0]
     );
   };
 
@@ -102,13 +97,13 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
     const type = getSelectedDrinkType();
     return (
       type.options.find(
-        (option) => option.key === mockUserData.preferred_drink_option
+        (option) => option.key === userData.preferred_drink_option
       ) || type.options[0]
     );
   };
 
   const [selectedOption, setSelectedOption] = useState(getSelectedOption());
-  const [drinkName, setDrinkName] = useState(mockUserData.favorite_drink || "");
+  const [drinkName, setDrinkName] = useState(userData?.favorite_drink || "");
   const [customAmount, setCustomAmount] = useState("");
   const [customUnit, setCustomUnit] = useState("");
   const [useCustomTime, setUseCustomTime] = useState(false);
@@ -169,67 +164,83 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
     setCustomUnit("");
   };
 
-  const handleLogDrink = () => {
-    if (timeMode === "lastNight") {
-      // Handle Last Night mode
-      const lastNightTime = new Date();
-      lastNightTime.setHours(23, 0, 0, 0); // Set to 11 PM last night
-      lastNightTime.setDate(lastNightTime.getDate() - 1);
+  const handleLogDrink = async () => {
+    try {
+      if (timeMode === "lastNight") {
+        // Handle Last Night mode - create bulk approximate drinks
+        const lastNightTime = new Date();
+        lastNightTime.setHours(23, 0, 0, 0); // Set to 11 PM last night
+        lastNightTime.setDate(lastNightTime.getDate() - 1);
 
-      onLogDrink({
-        type: "approximate",
-        name: isUncertain ? "Unknown drinks" : `${sliderValue} drinks`,
-        amount: sliderValue,
-        unit: "drinks",
-        emoji: "🍺",
-        timestamp: lastNightTime,
-        isApproximate: true,
-      });
-    } else {
-      // Handle normal mode
-      const amount = customAmount
-        ? parseFloat(customAmount)
-        : selectedOption.amount;
-      const unit = customUnit || selectedOption.unit;
+        // Create bulk drink logs for last night
+        await createBulkDrinkLogs(
+          userData?.id || "",
+          sliderValue,
+          lastNightTime.toISOString(),
+          true
+        );
+      } else {
+        // Handle normal mode
+        const amount = customAmount
+          ? parseFloat(customAmount)
+          : selectedOption.amount;
+        const unit = customUnit || selectedOption.unit;
 
-      if (customAmount && (isNaN(amount) || amount <= 0)) {
-        Alert.alert(t("invalidAmount"), t("invalidAmountMessage"));
-        return;
+        if (customAmount && (isNaN(amount) || amount <= 0)) {
+          Alert.alert(t("invalidAmount"), t("invalidAmountMessage"));
+          return;
+        }
+
+        // Validate that the amount is positive (for both custom and predefined options)
+        if (amount <= 0) {
+          Alert.alert(t("invalidAmount"), t("invalidAmountMessage"));
+          return;
+        }
+
+        // Convert to mL for database storage
+        const amountMl = convertUnit(amount, unit as any, "ml");
+
+        await createDrinkLog({
+          drink_type: selectedType.id as DrinkTypeKey,
+          drink_option: selectedOption.key as DrinkOptionKey,
+          drink_name: drinkName || undefined,
+          amount_ml: amountMl,
+          timestamp: useCustomTime ? customTime.toISOString() : undefined,
+          is_approximate: false,
+          alcohol_percentage: selectedType.alcohol_percentage,
+        });
       }
 
-      onLogDrink({
-        type: selectedType.id,
-        name: drinkName || t(selectedType.name_key as any),
-        amount,
-        unit,
-        emoji: selectedType.emoji,
-        timestamp: useCustomTime ? customTime : undefined,
-        isApproximate: false,
-      });
-    }
+      // Reset form
+      setSelectedType(getSelectedDrinkType());
+      setSelectedOption(getSelectedOption());
+      setCustomAmount("");
+      setCustomUnit("");
+      setUseCustomTime(false);
+      setCustomTime(new Date());
+      setShowDatePicker(false);
+      setShowTimePicker(false);
+      setCanHandleDateSelection(false);
+      setCanHandleTimeSelection(false);
+      setTimeMode("now");
+      setSliderValue(0);
+      setIsUncertain(false);
 
-    // Reset form
-    setSelectedType(getSelectedDrinkType());
-    setSelectedOption(getSelectedOption());
-    setCustomAmount("");
-    setCustomUnit("");
-    setUseCustomTime(false);
-    setCustomTime(new Date());
-    setShowDatePicker(false);
-    setShowTimePicker(false);
-    setCanHandleDateSelection(false);
-    setCanHandleTimeSelection(false);
-    setTimeMode("now");
-    setSliderValue(0);
-    setIsUncertain(false);
-    onClose();
+      // Call the callback to refresh data
+      onDrinkLogged?.();
+
+      onClose();
+    } catch (error) {
+      console.error("Error logging drink:", error);
+      Alert.alert("Error", "Failed to log drink. Please try again.");
+    }
   };
 
   const handleCancel = () => {
     // Reset form
     setSelectedType(getSelectedDrinkType());
     setSelectedOption(getSelectedOption());
-    setDrinkName(mockUserData.favorite_drink || "");
+    setDrinkName(userData?.favorite_drink || "");
     setCustomAmount("");
     setCustomUnit("");
     setUseCustomTime(false);

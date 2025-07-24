@@ -1,21 +1,17 @@
-import React, { useMemo, useState } from "react";
-import {
-  Alert,
-  SectionList,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useMemo } from "react";
+import { SectionList, StyleSheet, View } from "react-native";
+import { ContextMenuView } from "react-native-ios-context-menu";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Colors } from "@/constants/Colors";
+import { useDrinkLogs } from "@/hooks/useDrinkLogs";
 import { useTranslation } from "@/hooks/useTranslation";
-import {
-  DrinkLog,
-  formatDate,
-  formatTime,
-  mockUserData,
-} from "@/utils/mockData";
+import { DrinkLog } from "@/lib/database/schema";
+import { deleteDrinkLog } from "@/services/drinkService";
+import { getDrinkTypeEmoji } from "@/utils/drinks";
+import { formatDrinkAmount } from "@/utils/formatDrinkAmount";
+import { formatDate, formatTime } from "@/utils/mockData";
 
 interface LogSection {
   title: string;
@@ -24,16 +20,23 @@ interface LogSection {
 
 export default function LogsScreen() {
   const { t } = useTranslation();
+  const { data } = useDrinkLogs("local-user");
 
   // Group logs by day
   const sections = useMemo(() => {
     const groupedLogs: { [key: string]: DrinkLog[] } = {};
 
-    // Use the new drinks structure directly
-    Object.entries(mockUserData.drinks).forEach(([dateKey, logsForDay]) => {
-      if (logsForDay.length > 0) {
-        groupedLogs[dateKey] = logsForDay;
+    // Group the flat array of logs by date
+    (data || []).forEach((log) => {
+      const date = new Date(log.timestamp);
+      const dateString = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+      if (!groupedLogs[dateString]) {
+        groupedLogs[dateString] = [];
       }
+      groupedLogs[dateString].push(log);
     });
 
     // Convert to SectionList format and sort by date (newest first)
@@ -50,12 +53,15 @@ export default function LogsScreen() {
           new Date(b.data[0].timestamp).getTime() -
           new Date(a.data[0].timestamp).getTime()
       );
-  }, []);
+  }, [data]);
 
-  const handleDeleteLog = (logId: string) => {
-    console.log("Delete pressed for log:", logId);
-    // TODO: Implement actual deletion logic
-    Alert.alert("Delete Log", "Log deletion will be implemented soon!");
+  const handleDeleteLog = async (logId: string) => {
+    try {
+      await deleteDrinkLog(logId);
+      // No need to manually refresh - SQLiteProvider will handle it
+    } catch (error) {
+      console.error("Error deleting drink log:", error);
+    }
   };
 
   const renderSectionHeader = ({ section }: { section: LogSection }) => (
@@ -65,24 +71,80 @@ export default function LogsScreen() {
   );
 
   const renderLogItem = ({ item }: { item: DrinkLog }) => (
-    <TouchableOpacity
+    <ContextMenuView
       style={styles.logItem}
-      onLongPress={() => handleDeleteLog(item.id)}
-      onPress={() => console.log("Log pressed:", item.id)}
+      onPressMenuItem={({
+        nativeEvent,
+      }: {
+        nativeEvent: { actionKey: string };
+      }) => {
+        switch (nativeEvent.actionKey) {
+          // case "view":
+          //   console.log("View drink details:", item.id);
+          //   break;
+          // case "edit":
+          //   console.log("Edit drink:", item.id);
+          //   break;
+          case "delete":
+            handleDeleteLog(item.id);
+            break;
+        }
+      }}
+      menuConfig={{
+        menuTitle: "Actions",
+        menuItems: [
+          {
+            //   actionKey: 'view',
+            //   actionTitle: 'View Details',
+            //   icon: {
+            //     type: 'IMAGE_SYSTEM',
+            //     imageValue: {
+            //       systemName: 'eye',
+            //     },
+            //   },
+            // }, {
+            //   actionKey: 'edit',
+            //   actionTitle: 'Edit Drink',
+            //   icon: {
+            //     type: 'IMAGE_SYSTEM',
+            //     imageValue: {
+            //       systemName: 'pencil',
+            //     },
+            //   },
+            // },
+
+            actionKey: "delete",
+            actionTitle: "Delete Drink",
+            menuAttributes: ["destructive"],
+            icon: {
+              type: "IMAGE_SYSTEM",
+              imageValue: {
+                systemName: "trash",
+              },
+            },
+          },
+        ],
+      }}
     >
       <View style={styles.logContent}>
-        <ThemedText style={styles.logEmoji}>{item.emoji}</ThemedText>
+        <ThemedText style={styles.logEmoji}>
+          {getDrinkTypeEmoji(item.drink_type)}
+        </ThemedText>
         <View style={styles.logInfo}>
           <ThemedText style={styles.logName}>
-            {item.name} - {item.amount}
-            {item.unit}
+            {item.drink_name || t(item.drink_type)} -{" "}
+            {formatDrinkAmount(
+              item.amount_ml,
+              "ml"
+              // userData?.preferred_unit || "oz"
+            )}
           </ThemedText>
           <ThemedText style={styles.logTime}>
             {formatTime(item.timestamp)}
           </ThemedText>
         </View>
       </View>
-    </TouchableOpacity>
+    </ContextMenuView>
   );
 
   const renderItemSeparator = () => <View style={styles.itemSeparator} />;
@@ -120,6 +182,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 32,
+    lineHeight: 40,
     fontWeight: "bold",
     color: "#11181C",
   },
@@ -137,8 +200,11 @@ const styles = StyleSheet.create({
     color: "#11181C",
   },
   logItem: {
-    paddingVertical: 16,
+    paddingVertical: 8,
     paddingHorizontal: 0,
+    backgroundColor: Colors.light.background,
+    // Add subtle visual feedback for context menu
+    borderRadius: 8,
   },
   logContent: {
     flexDirection: "row",

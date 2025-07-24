@@ -19,8 +19,9 @@ export const convertUnit = (amount: number, fromUnit: UnitType, toUnit: UnitType
   if (toUnit === 'ml') return mlAmount;
   if (toUnit === 'oz') return mlAmount * UNIT_CONVERSIONS.ml.to_oz;
   if (toUnit === 'l') return mlAmount / 1000;
+  if (toUnit === 'drink') return mlAmount / UNIT_CONVERSIONS.drink.to_ml;
   
-  return amount; // For 'drink' unit, return original amount
+  return amount; // Fallback
 };
 
 // Calculate alcohol units (1 unit = 10g pure alcohol)
@@ -128,6 +129,10 @@ export const getDrinkTypes = (t: (key: string) => string): DrinkType[] => {
     ...type,
     name: t(type.name_key),
   }));
+};
+
+export const getDrinkTypeEmoji = (typeKey: DrinkTypeKey): string => {
+  return DRINK_TYPES[typeKey]?.emoji || "";
 };
 
 // Get drink option by key

@@ -1,9 +1,15 @@
+import { db } from "@/lib/database";
+import {
+  calculateAlcoholUnits,
+  calculateDailyConsumption,
+  calculateDrinkStatistics,
+  calculateWeeklyConsumption,
+} from "@/lib/database/calculations";
+import { drinkLogs, type DrinkLog } from "@/lib/database/schema";
 import { DrinkOptionKey, DrinkTypeKey } from "@/types";
 import { validateDrinkLog } from "@/utils/drinks";
-import { db } from "@/lib/database";
-import { drinkLogs, userPreferences, type DrinkLog } from "@/lib/database/schema";
-import { eq, desc, gte, lte, and } from "drizzle-orm";
-import { calculateDailyConsumption, calculateWeeklyConsumption, calculateDrinkStatistics, calculateAlcoholUnits } from "@/lib/database/calculations";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
+import * as Crypto from "expo-crypto";
 
 export interface CreateDrinkLogData {
   drink_type: DrinkTypeKey;
@@ -51,7 +57,7 @@ export const createDrinkLog = async (
     }
 
     const newDrinkLog = {
-      id: crypto.randomUUID(),
+      id: Crypto.randomUUID(),
       user_id: "local-user", // TODO: Get from auth context
       drink_type: data.drink_type,
       drink_option: data.drink_option,
@@ -80,7 +86,7 @@ export const getDrinkLogs = async (
 ): Promise<DrinkLogWithCalculations[]> => {
   try {
     const conditions = [eq(drinkLogs.user_id, userId)];
-    
+
     if (startDate) {
       conditions.push(gte(drinkLogs.timestamp, startDate));
     }
@@ -88,12 +94,14 @@ export const getDrinkLogs = async (
       conditions.push(lte(drinkLogs.timestamp, endDate));
     }
 
-    const logs = await db.select().from(drinkLogs)
+    const logs = await db
+      .select()
+      .from(drinkLogs)
       .where(and(...conditions))
       .orderBy(desc(drinkLogs.timestamp));
-    
+
     // Add calculated fields
-    return logs.map(log => ({
+    return logs.map((log) => ({
       ...log,
       amount_ml: log.amount_ml,
       amount_oz: log.amount_ml * 0.033814,
@@ -149,7 +157,11 @@ export const getWeeklyConsumption = async (
 ): Promise<WeeklyConsumption[]> => {
   try {
     const logs = await getDrinkLogs(userId);
-    const start = startDate || new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const start =
+      startDate ||
+      new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0];
     return calculateWeeklyConsumption(logs, start);
   } catch (error) {
     console.error("Error in getWeeklyConsumption:", error);
@@ -172,7 +184,8 @@ export const updateDrinkLog = async (
       );
     }
 
-    const result = await db.update(drinkLogs)
+    const result = await db
+      .update(drinkLogs)
       .set({
         ...updates,
         updated_at: new Date().toISOString(),
@@ -226,7 +239,7 @@ export const createBulkDrinkLogs = async (
 ): Promise<DrinkLog[]> => {
   try {
     const bulkDrinkLogs = Array.from({ length: drinkCount }, (_, index) => ({
-      id: crypto.randomUUID(),
+      id: Crypto.randomUUID(),
       user_id: userId,
       drink_type: "other" as DrinkTypeKey,
       drink_option: "standard" as DrinkOptionKey,

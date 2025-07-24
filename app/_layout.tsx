@@ -18,11 +18,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 function AppInitializer() {
   const { initializeAuth } = useAuth();
-  const {
-    isInitialized: isDBInitialized,
-    isLoading: isDBLoading,
-    error: dbError,
-  } = useDatabase();
+  const { isLoading: isDBLoading, error: dbError } = useDatabase();
 
   useEffect(() => {
     initializeAuth();
@@ -38,8 +34,6 @@ function AppInitializer() {
     console.error("Database initialization failed:", dbError);
     // You could show an error screen here
   }
-
-  console.log("isDBInitialized", isDBInitialized);
 
   return null;
 }

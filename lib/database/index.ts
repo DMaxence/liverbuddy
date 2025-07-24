@@ -3,7 +3,9 @@ import { drizzle } from "drizzle-orm/expo-sqlite";
 import { drinkLogs, userPreferences } from "./schema";
 
 // Open the database
-const sqlite = SQLite.openDatabaseSync("liverbuddy.db");
+const sqlite = SQLite.openDatabaseSync("liverbuddy.db", {
+  enableChangeListener: true,
+});
 
 // Create Drizzle instance
 export const db = drizzle(sqlite, { schema: { drinkLogs, userPreferences } });

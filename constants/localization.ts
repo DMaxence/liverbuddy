@@ -17,7 +17,7 @@ export const translations = {
     calendar: "Calendar",
     stats: "Stats",
     settings: "Settings",
-    
+
     // Home Screen
     appTitle: "LiverBuddy",
     lastDrink: "Last drink",
@@ -27,13 +27,13 @@ export const translations = {
     never: "Never",
     daysAgo: "days ago",
     emptyStateMessage: "No drinks yet — keep up the great work! 🍀",
-    
+
     // Greetings
-    morning: "Morning",
-    afternoon: "Afternoon", 
-    evening: "Evening",
+    morning: "Good morning",
+    afternoon: "Good afternoon",
+    evening: "Good evening",
     hey: "Hey",
-    
+
     // Modal
     logADrink: "Log a Drink",
     cancel: "Cancel",
@@ -48,14 +48,14 @@ export const translations = {
     summary: "Summary",
     invalidAmount: "Invalid Amount",
     invalidAmountMessage: "Please enter a valid amount.",
-    
+
     // Drink Types
     beer: "Beer",
-    wine: "Wine", 
+    wine: "Wine",
     cocktail: "Cocktail",
     spirits: "Spirits",
     other: "Other",
-    
+
     // Drink Options
     can: "Can",
     bottle: "Bottle",
@@ -71,31 +71,50 @@ export const translations = {
     small: "Small",
     medium: "Medium",
     extra_large: "Extra Large",
-    
+
     // Units
     ml: "mL",
+    cl: "cL",
     oz: "oz",
     l: "L",
     drink: "drink",
     drinks: "drinks",
-    
+
     // Time
     justNow: "Just now",
     hourAgo: "hour ago",
     hoursAgo: "hours ago",
     yesterday: "Yesterday",
-    
+
     // Quick Add Button
+    add: "Add",
+    of: "of",
     addDrink: "Add drink",
     addLastNightDrinks: "Add last night drinks",
-    
+
     // Liver States
     perfectlyHealthy: "Perfectly Healthy",
-    kindaVibing: "Kinda Vibing", 
+    kindaVibing: "Kinda Vibing",
     lowkeyStruggling: "Lowkey Struggling",
     runningOnRegret: "Running on Regret",
     deeplyConcerned: "Deeply Concerned",
     legallyDeceased: "Legally Deceased",
+
+    // Calendar
+    drinkingCalendar: "Drinking Calendar",
+    monthlySummary: "Monthly Summary",
+    totalDrinks: "Total drinks",
+    averagePerDay: "Average per day",
+    worstDay: "Worst day",
+    topDrinkType: "Top drink type",
+    noDrinksLogged: "No drinks logged for this day! 🧠",
+    loadingCalendar: "Loading calendar...",
+
+    // Stats
+    totalDrinksLabel: "Total drinks",
+    averagePerDayLabel: "Average per day",
+    worstDayLabel: "Worst day",
+    topDrinkTypeLabel: "Top drink type",
   },
   fr: {
     // Navigation
@@ -103,7 +122,7 @@ export const translations = {
     calendar: "Calendrier",
     stats: "Statistiques",
     settings: "Paramètres",
-    
+
     // Home Screen
     appTitle: "LiverBuddy",
     lastDrink: "Dernière boisson",
@@ -113,13 +132,13 @@ export const translations = {
     never: "Jamais",
     daysAgo: "jours",
     emptyStateMessage: "Aucune boisson encore — continuez comme ça ! 🍀",
-    
+
     // Greetings
-    morning: "Matin",
-    afternoon: "Après-midi",
-    evening: "Soir",
+    morning: "Bonjour",
+    afternoon: "Bon après-midi",
+    evening: "Bonsoir",
     hey: "Salut",
-    
+
     // Modal
     logADrink: "Enregistrer une Boisson",
     cancel: "Annuler",
@@ -134,14 +153,14 @@ export const translations = {
     summary: "Résumé",
     invalidAmount: "Quantité Invalide",
     invalidAmountMessage: "Veuillez saisir une quantité valide.",
-    
+
     // Drink Types
     beer: "Bière",
     wine: "Vin",
     cocktail: "Cocktail",
     spirits: "Spiritueux",
     other: "Autre",
-    
+
     // Drink Options
     can: "Canette",
     bottle: "Bouteille",
@@ -157,24 +176,27 @@ export const translations = {
     small: "Petite",
     medium: "Moyenne",
     extra_large: "Très Grande",
-    
+
     // Units
     ml: "mL",
+    cl: "cL",
     oz: "oz",
     l: "L",
     drink: "verre",
     drinks: "verres",
-    
+
     // Time
     justNow: "À l'instant",
     hourAgo: "heure",
     hoursAgo: "heures",
     yesterday: "Hier",
-    
+
     // Quick Add Button
+    add: "Ajouter",
+    of: "de",
     addDrink: "Ajouter une boisson",
     addLastNightDrinks: "Ajouter les boissons d'hier soir",
-    
+
     // Liver States
     perfectlyHealthy: "Parfaitement Sain",
     kindaVibing: "Plutôt Cool",
@@ -182,11 +204,30 @@ export const translations = {
     runningOnRegret: "Survit sur les Regrets",
     deeplyConcerned: "Profondément Inquiet",
     legallyDeceased: "Légalement Décédé",
+
+    // Calendar
+    drinkingCalendar: "Calendrier de Consommation",
+    monthlySummary: "Résumé Mensuel",
+    totalDrinks: "Total des boissons",
+    averagePerDay: "Moyenne par jour",
+    worstDay: "Pire jour",
+    topDrinkType: "Type de boisson préféré",
+    noDrinksLogged: "Aucune boisson enregistrée pour ce jour ! 🧠",
+    loadingCalendar: "Chargement du calendrier...",
+
+    // Stats
+    totalDrinksLabel: "Total des boissons",
+    averagePerDayLabel: "Moyenne par jour",
+    worstDayLabel: "Pire jour",
+    topDrinkTypeLabel: "Type de boisson préféré",
   },
 } as const;
 
 export type TranslationKey = keyof typeof translations.en;
 
-export const getTranslation = (key: TranslationKey, language: SupportedLanguage = "en"): string => {
+export const getTranslation = (
+  key: TranslationKey,
+  language: SupportedLanguage = "en"
+): string => {
   return translations[language][key] || translations.en[key] || key;
 };
