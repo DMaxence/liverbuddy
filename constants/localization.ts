@@ -17,12 +17,13 @@ export const translations = {
     calendar: "Calendar",
     stats: "Stats",
     settings: "Settings",
+    listDrinks: "Drinks",
 
     // Home Screen
     appTitle: "LiverBuddy",
     lastDrink: "Last drink",
     thisWeeksDrinks: "This week's drinks",
-    recentLogs: "recent logs",
+    recentDrinks: "Recent drinks",
     thisWeek: "This Week",
     never: "Never",
     daysAgo: "days ago",
@@ -82,6 +83,8 @@ export const translations = {
 
     // Time
     justNow: "Just now",
+    minuteAgo: "minute ago",
+    minutesAgo: "minutes ago",
     hourAgo: "hour ago",
     hoursAgo: "hours ago",
     yesterday: "Yesterday",
@@ -91,6 +94,12 @@ export const translations = {
     of: "of",
     addDrink: "Add drink",
     addLastNightDrinks: "Add last night drinks",
+    
+    // Toast Messages
+    drinkAddedSuccess: "Drink logged successfully!",
+    drinkAddedToast: "Added", // Used in toast: "Added [amount] [drink] 🍺"
+    drinkAddError: "Failed to add drink",
+    drinkAddErrorDescription: "Please try again",
 
     // Liver States
     perfectlyHealthy: "Perfectly Healthy",
@@ -115,6 +124,40 @@ export const translations = {
     averagePerDayLabel: "Average per day",
     worstDayLabel: "Worst day",
     topDrinkTypeLabel: "Top drink type",
+
+    // Logs Screen
+    edit: "Edit",
+    done: "Done",
+    deleteSelectedDrinks: "Delete Selected Drinks",
+    deleteSelectedDrinksMessage: "Are you sure you want to delete {count} drink{plural}?",
+    deleteDrink: "Delete Drink",
+    actions: "Actions",
+    deleteItem: "Delete {count} item{plural}",
+    delete: "Delete",
+
+    // Last Night Slider
+    howHeavyWasLastNight: "How heavy was last night?",
+    stoneColdSober: "Stone-cold sober",
+    barelyABuzz: "Barely a buzz",
+    feelingTipsy: "Feeling tipsy",
+    nightGotInteresting: "The night got interesting",
+    whoBoughtLastRound: "Who bought the last round?",
+    dontEvenRemember: "Bro, I don't even remember...\nhell of a hangover",
+
+    // Time Selector
+    when: "When?",
+    now: "Now",
+    earlier: "Earlier",
+    lastNight: "Last Night",
+    selectATime: "Select a time",
+
+    // Common
+    error: "Error",
+
+    // Not Found Screen
+    oops: "Oops!",
+    screenDoesNotExist: "This screen does not exist.",
+    goToHomeScreen: "Go to home screen!",
   },
   fr: {
     // Navigation
@@ -122,12 +165,13 @@ export const translations = {
     calendar: "Calendrier",
     stats: "Statistiques",
     settings: "Paramètres",
+    listDrinks: "Boissons",
 
     // Home Screen
     appTitle: "LiverBuddy",
     lastDrink: "Dernière boisson",
     thisWeeksDrinks: "Boissons de la semaine",
-    recentLogs: "logs récents",
+    recentDrinks: "Boissons récentes",
     thisWeek: "Cette Semaine",
     never: "Jamais",
     daysAgo: "jours",
@@ -187,6 +231,8 @@ export const translations = {
 
     // Time
     justNow: "À l'instant",
+    minuteAgo: "minute",
+    minutesAgo: "minutes",
     hourAgo: "heure",
     hoursAgo: "heures",
     yesterday: "Hier",
@@ -196,6 +242,12 @@ export const translations = {
     of: "de",
     addDrink: "Ajouter une boisson",
     addLastNightDrinks: "Ajouter les boissons d'hier soir",
+    
+    // Toast Messages
+    drinkAddedSuccess: "Boisson enregistrée avec succès !",
+    drinkAddedToast: "Ajouté", // Used in toast: "Ajouté [amount] [drink] 🍺"
+    drinkAddError: "Échec de l'ajout de la boisson",
+    drinkAddErrorDescription: "Veuillez réessayer",
 
     // Liver States
     perfectlyHealthy: "Parfaitement Sain",
@@ -220,6 +272,40 @@ export const translations = {
     averagePerDayLabel: "Moyenne par jour",
     worstDayLabel: "Pire jour",
     topDrinkTypeLabel: "Type de boisson préféré",
+
+    // Logs Screen
+    edit: "Modifier",
+    done: "Terminé",
+    deleteSelectedDrinks: "Supprimer les Boissons Sélectionnées",
+    deleteSelectedDrinksMessage: "Êtes-vous sûr de vouloir supprimer {count} boisson{plural} ?",
+    deleteDrink: "Supprimer la Boisson",
+    actions: "Actions",
+    deleteItem: "Supprimer {count} élément{plural}",
+    delete: "Supprimer",
+
+    // Last Night Slider
+    howHeavyWasLastNight: "À quel point était-ce intense hier soir ?",
+    stoneColdSober: "Sobre comme un roc",
+    barelyABuzz: "À peine une sensation",
+    feelingTipsy: "Un peu pompette",
+    nightGotInteresting: "La soirée est devenue intéressante",
+    whoBoughtLastRound: "Qui a payé la dernière tournée ?",
+    dontEvenRemember: "Mec, je me souviens même plus...\nquelle gueule de bois",
+
+    // Time Selector
+    when: "Quand ?",
+    now: "Maintenant",
+    earlier: "Plus tôt",
+    lastNight: "Hier soir",
+    selectATime: "Sélectionner une heure",
+
+    // Common
+    error: "Erreur",
+
+    // Not Found Screen
+    oops: "Oups !",
+    screenDoesNotExist: "Cet écran n'existe pas.",
+    goToHomeScreen: "Aller à l'écran d'accueil !",
   },
 } as const;
 

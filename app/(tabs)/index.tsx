@@ -8,7 +8,6 @@ import {
   View,
 } from "react-native";
 
-import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { MiniCalendar } from "@/components/MiniCalendar";
 import { NewDrinkModal } from "@/components/NewDrinkModal";
 import { ThemedText } from "@/components/ThemedText";
@@ -26,6 +25,10 @@ import {
   getGreeting,
   getQuickAddButtonText,
 } from "@/utils/mockData";
+import { isWithinLastHour, getMostRecentDrink } from "@/utils/dateUtils";
+import { createDrinkLog } from "@/services/drinkService";
+import { toast } from "sonner-native";
+import { Colors } from "@/constants/Colors";
 
 // Import all liver images statically
 const shadow = require("@/assets/images/shadow.png");
@@ -71,6 +74,51 @@ export default function HomeScreen() {
     console.log("Settings pressed");
   };
 
+  // Quick add functionality for recent drinks
+  const getMostRecentDrinkWithinHour = () => {
+    if (!userData?.recentLogs || userData.recentLogs.length === 0) {
+      return null;
+    }
+
+    const mostRecent = getMostRecentDrink(userData.recentLogs);
+    if (mostRecent && isWithinLastHour(mostRecent.timestamp)) {
+      return mostRecent;
+    }
+    return null;
+  };
+
+  const recentDrinkWithinHour = getMostRecentDrinkWithinHour();
+
+  const handleQuickAddDrink = async () => {
+    if (!recentDrinkWithinHour) return;
+
+    try {
+      await createDrinkLog({
+        drink_type: recentDrinkWithinHour.drink_type,
+        drink_option: recentDrinkWithinHour.drink_option,
+        drink_name: recentDrinkWithinHour.drink_name,
+        amount_ml: recentDrinkWithinHour.amount_ml,
+        alcohol_percentage: recentDrinkWithinHour.alcohol_percentage,
+      });
+
+      // Show success toast
+      const drinkName =
+        recentDrinkWithinHour.drink_name || t(recentDrinkWithinHour.drink_type);
+      const amount = formatDrinkAmount(
+        recentDrinkWithinHour.amount_ml,
+        userData?.preferred_unit || "ml"
+      );
+      toast.success(`${t("drinkAddedToast")} ${amount} ${drinkName} 🍺`, {
+        description: t("drinkAddedSuccess"),
+      });
+    } catch (error) {
+      console.error("Error adding quick drink:", error);
+      toast.error(t("drinkAddError"), {
+        description: t("drinkAddErrorDescription"),
+      });
+    }
+  };
+
   return (
     <ThemedView style={styles.container}>
       <ScrollView
@@ -84,12 +132,12 @@ export default function HomeScreen() {
             <ThemedText style={styles.greeting}>{greeting}</ThemedText>
             <ThemedText style={styles.date}>{currentDate}</ThemedText>
           </View>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.settingsButton}
             onPress={handleSettingsPress}
           >
             <ThemedText style={styles.settingsIcon}>⚙️</ThemedText>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </ThemedView>
 
         {/* Liver Avatar & Health Score */}
@@ -127,8 +175,8 @@ export default function HomeScreen() {
           <View style={styles.statItem}>
             <ThemedText style={styles.statLabel}>{t("lastDrink")}</ThemedText>
             <ThemedText style={styles.statValue}>
-              {userData?.lastDrinkDate
-                ? `${daysSinceLastDrink} ${t("daysAgo")}`
+              {userData?.lastDrinkTimestamp
+                ? formatRelativeTime(userData?.lastDrinkTimestamp)
                 : t("never")}
             </ThemedText>
           </View>
@@ -143,7 +191,7 @@ export default function HomeScreen() {
           </View>
         </ThemedView>
 
-        {/* Quick add button */}
+        {/* Add button */}
         <TouchableOpacity
           style={styles.quickAddButton}
           onPress={handleLogDrink}
@@ -153,9 +201,29 @@ export default function HomeScreen() {
           </ThemedText>
         </TouchableOpacity>
 
+        {/* Quick repeat button for recent drinks */}
+        {recentDrinkWithinHour && (
+          <TouchableOpacity
+            style={styles.quickRepeatButton}
+            onPress={handleQuickAddDrink}
+          >
+            <ThemedText style={styles.quickRepeatButtonText}>
+              {`${t("add")} `}
+              {formatDrinkAmount(
+                recentDrinkWithinHour.amount_ml,
+                userData?.preferred_unit || "ml"
+              )}
+              {` ${t("of")} `}
+              {recentDrinkWithinHour.drink_name ||
+                t(recentDrinkWithinHour.drink_type)}{" "}
+              {getDrinkTypeEmoji(recentDrinkWithinHour.drink_type)}
+            </ThemedText>
+          </TouchableOpacity>
+        )}
+
         {/* Recent Logs */}
         <View style={styles.logsSection}>
-          <ThemedText style={styles.logsTitle}>{t("recentLogs")}</ThemedText>
+          <ThemedText style={styles.logsTitle}>{t("recentDrinks")}</ThemedText>
           {userData?.recentLogs &&
           userData?.recentLogs.length &&
           userData?.recentLogs.length > 0 ? (
@@ -178,7 +246,8 @@ export default function HomeScreen() {
                         )}
                       </ThemedText>
                       <ThemedText style={styles.logTime}>
-                        {formatRelativeTime(drink.timestamp)}{" "}
+                        {formatRelativeTime(drink.timestamp)}
+                        {" - "}
                         {formatTime(drink.timestamp)}
                       </ThemedText>
                     </View>
@@ -201,9 +270,6 @@ export default function HomeScreen() {
         {/* Mini Calendar */}
         <MiniCalendar onDayPress={handleDayPress} />
       </ScrollView>
-
-      {/* Floating Action Button */}
-      <FloatingActionButton onPress={handleLogDrink} />
 
       {/* New Drink Modal */}
       {userData && (
@@ -420,5 +486,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
+  },
+  quickRepeatButton: {
+    backgroundColor: Colors.light.medium.color,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  quickRepeatButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Liver Buddy",
     "slug": "liverbuddy",
-    "version": "0.0.1",
+    "version": "0.0.12",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "liverbuddy",
@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.liverbuddy"
+      "bundleIdentifier": "com.liverbuddy",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -40,6 +43,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "15f10e2b-78f7-40cf-9f27-186cc57aa3dc"
+      }
+    },
+    "owner": "maxencedhx"
   }
 }

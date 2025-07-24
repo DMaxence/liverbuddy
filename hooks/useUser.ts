@@ -13,6 +13,7 @@ export interface UserData {
   name: string;
   healthScore: number;
   lastDrinkDate: string | null;
+  lastDrinkTimestamp: string | null;
   weeklyGoal: number;
   weeklyDrinks: number;
   recentLogs: DrinkLog[];
@@ -125,6 +126,7 @@ export const useUser = (userId: string = "local-user") => {
             ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
           })()
         : null;
+    const lastDrinkTimestamp = allLogs.length > 0 ? allLogs[0].timestamp : null;
 
     // Calculate weekly drinks
     const today = new Date();
@@ -151,6 +153,7 @@ export const useUser = (userId: string = "local-user") => {
       name: "User", // TODO: Get from user profile
       healthScore,
       lastDrinkDate,
+      lastDrinkTimestamp,
       weeklyGoal: userPrefs.weekly_goal,
       weeklyDrinks: weeklyCount,
       recentLogs,

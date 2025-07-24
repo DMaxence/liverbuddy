@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   calendarContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: Colors.dark.background,
+    backgroundColor: Colors.light.backgroundTint,
     borderRadius: 12,
     padding: 12,
   },

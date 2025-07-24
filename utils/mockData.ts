@@ -309,18 +309,26 @@ export const formatDate = (date: Date, lang?: string): string => {
 export const formatRelativeTime = (timestamp: string): string => {
   const now = new Date();
   const date = new Date(timestamp);
-  const diffInHours = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-  );
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
   const language = getDeviceLanguage();
 
   if (diffInHours < 24) {
-    if (diffInHours < 1) return getTranslation("justNow", language);
+    if (diffInMinutes < 1) return getTranslation("justNow", language);
+    if (diffInMinutes < 60) {
+      if (diffInMinutes === 1) return `1 ${getTranslation("minuteAgo", language)}`;
+      return `${diffInMinutes} ${getTranslation("minutesAgo", language)}`;
+    }
     if (diffInHours === 1) return `1 ${getTranslation("hourAgo", language)}`;
     return `${diffInHours} ${getTranslation("hoursAgo", language)}`;
   }
 
-  const diffInDays = Math.floor(diffInHours / 24);
+  // Calculate calendar day difference instead of 24-hour periods
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dateLocal = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffInDays = Math.floor((nowDate.getTime() - dateLocal.getTime()) / (1000 * 60 * 60 * 24));
+  
   if (diffInDays === 1) return getTranslation("yesterday", language);
   if (diffInDays < 7)
     return `${diffInDays} ${getTranslation("daysAgo", language)}`;
@@ -334,7 +342,7 @@ export const formatTime = (timestamp: string, lang?: string): string => {
   return date.toLocaleTimeString(language === "fr" ? "fr-FR" : "en-US", {
     hour: "numeric",
     minute: "2-digit",
-    hour12: true,
+    hour12: language === "fr" ? false : true,
   });
 };
 
