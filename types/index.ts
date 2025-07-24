@@ -29,60 +29,60 @@ export interface User {
 
 export type LiverState = {
   level: number;
-  name: string;
+  nameKey: string; // Translation key for the name
   emoji: string;
   color: string;
-  description: string;
+  descriptionKey: string; // Translation key for the description
   scoreRange: [number, number];
 };
 
 export const liverStates: LiverState[] = [
   {
     level: 1,
-    name: "Perfectly Healthy",
+    nameKey: "perfectlyHealthy",
     emoji: "🧘",
     color: "#4CAF50",
-    description: "I’m basically a green smoothie with legs.",
+    descriptionKey: "perfectlyHealthyDescription",
     scoreRange: [85, 100],
   },
   {
     level: 2,
-    name: "Kinda Vibing",
+    nameKey: "kindaVibing",
     emoji: "😎",
     color: "#8BC34A",
-    description: "One drink won't hurt… right?",
+    descriptionKey: "kindaVibingDescription",
     scoreRange: [70, 84],
   },
   {
     level: 3,
-    name: "Lowkey Struggling",
+    nameKey: "lowkeyStruggling",
     emoji: "😬",
     color: "#FFEB3B",
-    description: "We're still fine. Technically.",
+    descriptionKey: "lowkeyStrugglingDescription",
     scoreRange: [55, 69],
   },
   {
     level: 4,
-    name: "Running on Regret",
+    nameKey: "runningOnRegret",
     emoji: "🫠",
     color: "#FF9800",
-    description: "The liver is working overtime with no union rights.",
+    descriptionKey: "runningOnRegretDescription",
     scoreRange: [40, 54],
   },
   {
     level: 5,
-    name: "Deeply Concerned",
+    nameKey: "deeplyConcerned",
     emoji: "😵",
     color: "#F44336",
-    description: "You’ve turned your liver into a part-time bartender.",
+    descriptionKey: "deeplyConcernedDescription",
     scoreRange: [25, 39],
   },
   {
     level: 6,
-    name: "Legally Deceased",
+    nameKey: "legallyDeceased",
     emoji: "💀",
     color: "#9E9E9E",
-    description: "Not a liver. Just emotional baggage in organ form.",
+    descriptionKey: "legallyDeceasedDescription",
     scoreRange: [0, 24],
   },
 ];
@@ -179,3 +179,15 @@ export interface DrinkCalculation {
   display_amount: number;
   display_unit: UnitType;
 }
+
+// Helper function to get localized liver state
+export const getLocalizedLiverState = (
+  liverState: LiverState,
+  getTranslation: (key: keyof typeof import("@/constants/localization").translations.en) => string
+) => {
+  return {
+    ...liverState,
+    name: getTranslation(liverState.nameKey as any),
+    description: getTranslation(liverState.descriptionKey as any),
+  };
+};

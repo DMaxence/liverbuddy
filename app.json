@@ -2,7 +2,7 @@
   "expo": {
     "name": "Liver Buddy",
     "slug": "liverbuddy",
-    "version": "0.0.13",
+    "version": "0.0.14",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "liverbuddy",

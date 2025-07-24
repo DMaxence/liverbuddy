@@ -7,7 +7,7 @@ import { DrinkLog, drinkLogs, userPreferences } from "@/lib/database/schema";
 import { DrinkOptionKey, DrinkTypeKey, PreferredUnit } from "@/types";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { getDeviceLanguage } from "@/constants/localization";
+import { useLanguage } from "@/stores/uiStore";
 export interface UserData {
   id: string;
   name: string;
@@ -26,6 +26,7 @@ export interface UserData {
 }
 
 export const useUser = (userId: string = "local-user") => {
+  const language = useLanguage();
   // Get user preferences with live query
   const { data: preferencesData, error: preferencesError } = useLiveQuery(
     db
@@ -52,9 +53,7 @@ export const useUser = (userId: string = "local-user") => {
       preferred_drink_type: "beer" as DrinkTypeKey,
       preferred_drink_option: "can" as DrinkOptionKey,
       favorite_drink: undefined,
-      preferred_unit: (getDeviceLanguage() === "en"
-        ? "oz"
-        : "ml") as PreferredUnit,
+      preferred_unit: (language === "en" ? "oz" : "ml") as PreferredUnit,
       weekly_goal: 7,
     };
 

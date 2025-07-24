@@ -19,6 +19,7 @@ import { getDrinkTypeEmoji } from "@/utils/drinks";
 import { formatDrinkAmount } from "@/utils/formatDrinkAmount";
 import { formatDate, formatTime } from "@/utils/mockData";
 import { useUser } from "@/hooks/useUser";
+import { useLanguage } from "@/stores/uiStore";
 
 interface LogSection {
   title: string;
@@ -27,6 +28,7 @@ interface LogSection {
 
 export default function LogsScreen() {
   const { t } = useTranslation();
+  const language = useLanguage();
   const { data } = useDrinkLogs("local-user");
   const { userData } = useUser("local-user");
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -52,7 +54,7 @@ export default function LogsScreen() {
     // Convert to SectionList format and sort by date (newest first)
     return Object.entries(groupedLogs)
       .map(([dateKey, logsForDay]) => ({
-        title: formatDate(new Date(dateKey)),
+        title: formatDate(new Date(dateKey), language),
         data: logsForDay.sort(
           (a, b) =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -179,7 +181,7 @@ export default function LogsScreen() {
                 )}
               </ThemedText>
               <ThemedText style={styles.logTime}>
-                {formatTime(item.timestamp)}
+                {formatTime(item.timestamp, language)}
               </ThemedText>
             </View>
           </View>
@@ -256,7 +258,7 @@ export default function LogsScreen() {
               )}
             </ThemedText>
             <ThemedText style={styles.logTime}>
-              {formatTime(item.timestamp)}
+              {formatTime(item.timestamp, language)}
             </ThemedText>
           </View>
         </View>

@@ -164,10 +164,9 @@ export const formatDrinkOption = (
   option: DrinkOption,
   t: (key: string) => string,
   showAmount: boolean = true,
-  preferredUnitt: "ml" | "oz" = "ml"
+  preferredUnit: "ml" | "oz" = "ml"
 ): string => {
   const optionName = t(option.key);
-  const preferredUnit = "oz";
 
   if (!showAmount) return optionName;
 

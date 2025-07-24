@@ -12,23 +12,23 @@ import { MiniCalendar } from "@/components/MiniCalendar";
 import { NewDrinkModal } from "@/components/NewDrinkModal";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Colors } from "@/constants/Colors";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useUser } from "@/hooks/useUser";
-import { getLiverStateByScore } from "@/utils";
+import { createDrinkLog } from "@/services/drinkService";
+import { useLanguage } from "@/stores/uiStore";
+import { getLiverStateByScore, getLocalizedLiverState } from "@/utils";
+import { getMostRecentDrink, isWithinLastHour } from "@/utils/dateUtils";
 import { getDrinkTypeEmoji } from "@/utils/drinks";
 import { formatDrinkAmount } from "@/utils/formatDrinkAmount";
 import {
   formatDate,
   formatRelativeTime,
   formatTime,
-  getDaysSinceLastDrink,
   getGreeting,
   getQuickAddButtonText,
 } from "@/utils/mockData";
-import { isWithinLastHour, getMostRecentDrink } from "@/utils/dateUtils";
-import { createDrinkLog } from "@/services/drinkService";
 import { toast } from "sonner-native";
-import { Colors } from "@/constants/Colors";
 
 // Import all liver images statically
 const shadow = require("@/assets/images/shadow.png");
@@ -45,17 +45,17 @@ export default function HomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState<"normal" | "lastNight">("normal");
   const { userData } = useUser("local-user");
-  const liverState = getLiverStateByScore(userData?.healthScore || 100);
-  const progressPercentage = ((userData?.healthScore || 100) / 100) * 100;
-  const daysSinceLastDrink = getDaysSinceLastDrink(
-    userData?.lastDrinkDate || ""
-  );
-  const greeting = getGreeting();
-  const currentDate = formatDate(new Date());
+  const language = useLanguage();
   const { t } = useTranslation();
+  const baseLiverState = getLiverStateByScore(userData?.healthScore || 100);
+  const liverState = getLocalizedLiverState(baseLiverState, t);
+  const progressPercentage = ((userData?.healthScore || 100) / 100) * 100;
+
+  const greeting = getGreeting(language);
+  const currentDate = formatDate(new Date(), language);
 
   const handleLogDrink = () => {
-    const { mode } = getQuickAddButtonText(userData);
+    const { mode } = getQuickAddButtonText(userData, language);
     setModalMode(mode);
     setIsModalVisible(true);
   };
@@ -164,9 +164,9 @@ export default function HomeScreen() {
           </ThemedView>
           <View style={styles.stateLabel}>
             <ThemedText style={styles.stateText}>{liverState.name}</ThemedText>
-            <TouchableOpacity style={styles.infoIcon}>
+            {/* <TouchableOpacity style={styles.infoIcon}>
               <ThemedText style={styles.infoText}>ℹ</ThemedText>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </ThemedView>
 
@@ -176,7 +176,7 @@ export default function HomeScreen() {
             <ThemedText style={styles.statLabel}>{t("lastDrink")}</ThemedText>
             <ThemedText style={styles.statValue}>
               {userData?.lastDrinkTimestamp
-                ? formatRelativeTime(userData?.lastDrinkTimestamp)
+                ? formatRelativeTime(userData?.lastDrinkTimestamp, language)
                 : t("never")}
             </ThemedText>
           </View>
@@ -197,7 +197,7 @@ export default function HomeScreen() {
           onPress={handleLogDrink}
         >
           <ThemedText style={styles.quickAddButtonText}>
-            {getQuickAddButtonText(userData).text}
+            {getQuickAddButtonText(userData, language).text}
           </ThemedText>
         </TouchableOpacity>
 
@@ -246,9 +246,9 @@ export default function HomeScreen() {
                         )}
                       </ThemedText>
                       <ThemedText style={styles.logTime}>
-                        {formatRelativeTime(drink.timestamp)}
+                        {formatRelativeTime(drink.timestamp, language)}
                         {" - "}
-                        {formatTime(drink.timestamp)}
+                        {formatTime(drink.timestamp, language)}
                       </ThemedText>
                     </View>
                   </View>

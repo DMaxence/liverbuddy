@@ -108,6 +108,14 @@ export const translations = {
     runningOnRegret: "Running on Regret",
     deeplyConcerned: "Deeply Concerned",
     legallyDeceased: "Legally Deceased",
+    
+    // Liver State Descriptions
+    perfectlyHealthyDescription: "I'm basically a green smoothie with legs.",
+    kindaVibingDescription: "One drink won't hurt… right?",
+    lowkeyStrugglingDescription: "We're still fine. Technically.",
+    runningOnRegretDescription: "The liver is working overtime with no union rights.",
+    deeplyConcernedDescription: "You've turned your liver into a part-time bartender.",
+    legallyDeceasedDescription: "Not a liver. Just emotional baggage in organ form.",
 
     // Calendar
     drinkingCalendar: "Drinking Calendar",
@@ -256,6 +264,14 @@ export const translations = {
     runningOnRegret: "Survit sur les Regrets",
     deeplyConcerned: "Profondément Inquiet",
     legallyDeceased: "Légalement Décédé",
+    
+    // Liver State Descriptions
+    perfectlyHealthyDescription: "Je suis pratiquement un smoothie vert avec des jambes.",
+    kindaVibingDescription: "Un verre ne peut pas faire de mal… non ?",
+    lowkeyStrugglingDescription: "On s'en sort encore. Techniquement.",
+    runningOnRegretDescription: "Le foie travaille en surtemps sans droits syndicaux.",
+    deeplyConcernedDescription: "Tu as transformé ton foie en barman à temps partiel.",
+    legallyDeceasedDescription: "Pas un foie. Juste des bagages émotionnels sous forme d'organe.",
 
     // Calendar
     drinkingCalendar: "Calendrier de Consommation",

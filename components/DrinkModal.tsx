@@ -3,14 +3,16 @@ import { getQuickAddButtonText } from "@/utils/mockData";
 import { useState } from "react";
 import { NewDrinkModal } from "./NewDrinkModal";
 import { FloatingActionButton } from "./FloatingActionButton";
+import { useLanguage } from "@/stores/uiStore";
 
 export const DrinkModal = () => {
   const { userData } = useUser("local-user");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState<"normal" | "lastNight">("normal");
+  const language = useLanguage();
 
   const handleLogDrink = () => {
-    const { mode } = getQuickAddButtonText(userData);
+    const { mode } = getQuickAddButtonText(userData, language);
     setModalMode(mode);
     setIsModalVisible(true);
   };

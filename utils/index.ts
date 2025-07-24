@@ -1,5 +1,5 @@
 import { Colors } from "@/constants/Colors";
-import { LiverState, liverStates } from "@/types";
+import { LiverState, liverStates, getLocalizedLiverState } from "@/types";
 
 export const getLiverStateByScore = (score: number): LiverState => {
   return (
@@ -52,3 +52,6 @@ export {
   getDrinkTypes,
   validateDrinkLog,
 } from "./drinks";
+
+// Re-export the localized liver state function
+export { getLocalizedLiverState };
