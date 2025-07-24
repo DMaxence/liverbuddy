@@ -45,9 +45,14 @@ export const formatDrinkAmount = (
   } else if (displayAmount < 10) {
     // For medium amounts, show 1 decimal place
     return `${displayAmount.toFixed(1)} ${displayUnit}`;
+  } else if (displayAmount >= 10 && displayAmount < 100) {
+    // For medium amounts, show 1 decimal place
+    return `${Math.round(displayAmount)} ${displayUnit}`;
   } else {
     // For larger amounts, round to whole number
-    return `${Math.round(displayAmount)} ${displayUnit}`;
+    const liters = amountMl / 1000;
+    // Only show decimal if there is one, otherwise show plain number
+    return `${liters % 1 === 0 ? Math.round(liters) : liters.toFixed(1)} L`;
   }
 };
 
@@ -70,4 +75,4 @@ export const convertFromMl = (
     default:
       return amountMl * UNIT_CONVERSIONS.ml.to_oz;
   }
-}; 
+};

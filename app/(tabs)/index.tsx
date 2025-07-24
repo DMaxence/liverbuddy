@@ -242,7 +242,7 @@ export default function HomeScreen() {
                         {drink.drink_name || t(drink.drink_type)} -{" "}
                         {formatDrinkAmount(
                           drink.amount_ml,
-                          userData?.preferred_unit || "oz"
+                          userData?.preferred_unit || "ml"
                         )}
                       </ThemedText>
                       <ThemedText style={styles.logTime}>

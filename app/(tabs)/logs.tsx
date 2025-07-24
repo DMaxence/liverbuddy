@@ -18,6 +18,7 @@ import { deleteDrinkLog } from "@/services/drinkService";
 import { getDrinkTypeEmoji } from "@/utils/drinks";
 import { formatDrinkAmount } from "@/utils/formatDrinkAmount";
 import { formatDate, formatTime } from "@/utils/mockData";
+import { useUser } from "@/hooks/useUser";
 
 interface LogSection {
   title: string;
@@ -27,6 +28,7 @@ interface LogSection {
 export default function LogsScreen() {
   const { t } = useTranslation();
   const { data } = useDrinkLogs("local-user");
+  const { userData } = useUser("local-user");
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
@@ -173,8 +175,7 @@ export default function LogsScreen() {
                 {item.drink_name || t(item.drink_type)} -{" "}
                 {formatDrinkAmount(
                   item.amount_ml,
-                  "ml"
-                  // userData?.preferred_unit || "oz"
+                  userData?.preferred_unit || "ml"
                 )}
               </ThemedText>
               <ThemedText style={styles.logTime}>
@@ -251,8 +252,7 @@ export default function LogsScreen() {
               {item.drink_name || t(item.drink_type)} -{" "}
               {formatDrinkAmount(
                 item.amount_ml,
-                "ml"
-                // userData?.preferred_unit || "oz"
+                userData?.preferred_unit || "ml"
               )}
             </ThemedText>
             <ThemedText style={styles.logTime}>
