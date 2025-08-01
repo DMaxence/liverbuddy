@@ -1,13 +1,11 @@
 import { db } from "@/lib/database";
-import {
-  calculateDailyConsumption,
-  calculateDrinkStatistics,
-} from "@/lib/database/calculations";
+import { calculateMedicalHealthScore } from "@/lib/database/calculations";
 import { DrinkLog, drinkLogs, userPreferences } from "@/lib/database/schema";
+import { useLanguage } from "@/stores/uiStore";
 import { DrinkOptionKey, DrinkTypeKey, PreferredUnit } from "@/types";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useLanguage } from "@/stores/uiStore";
+
 export interface UserData {
   id: string;
   name: string;
@@ -27,6 +25,7 @@ export interface UserData {
 
 export const useUser = (userId: string = "local-user") => {
   const language = useLanguage();
+
   // Get user preferences with live query
   const { data: preferencesData, error: preferencesError } = useLiveQuery(
     db
@@ -88,26 +87,25 @@ export const useUser = (userId: string = "local-user") => {
       drinksByDate[dateString].push(log);
     });
 
-    // Calculate daily health scores
+    // Calculate daily health scores using medically accurate algorithm
     const dailyHealthScores: { [date: string]: number } = {};
-    Object.entries(drinksByDate).forEach(([date, dayLogs]) => {
-      const consumption = calculateDailyConsumption(allLogs, date);
-      // Calculate health score based on alcohol units
-      let healthScore = 100;
-      if (consumption.total_alcohol_units > 8)
-        healthScore = 20; // Very heavy drinking
-      else if (consumption.total_alcohol_units > 6)
-        healthScore = 35; // Heavy drinking
-      else if (consumption.total_alcohol_units > 4)
-        healthScore = 50; // Moderate-heavy drinking
-      else if (consumption.total_alcohol_units > 2)
-        healthScore = 65; // Moderate drinking
-      else if (consumption.total_alcohol_units > 1)
-        healthScore = 80; // Light drinking
-      else if (consumption.total_alcohol_units > 0) healthScore = 90; // Very light drinking
 
-      dailyHealthScores[date] = healthScore;
-    });
+    // Calculate scores for all recent days (last 30 days)
+    const currentDate = new Date();
+    for (let i = 0; i < 30; i++) {
+      const checkDate = new Date(currentDate);
+      checkDate.setDate(currentDate.getDate() - i);
+      const dateString = `${checkDate.getFullYear()}-${String(
+        checkDate.getMonth() + 1
+      ).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
+
+      // Calculate health score for this date (includes recovery calculation for no-drink days)
+      const score = calculateMedicalHealthScore(allLogs, dateString);
+      dailyHealthScores[dateString] = score;
+      
+      const drinkCount = drinksByDate[dateString]?.length || 0;
+      console.log(`Health score for ${dateString}: ${score} (${drinkCount} drinks)`);
+    }
 
     // Get recent logs (last 3 days)
     const recentLogs = allLogs
@@ -142,16 +140,39 @@ export const useUser = (userId: string = "local-user") => {
       }
     });
 
-    // Calculate overall health score
-    const stats = calculateDrinkStatistics(allLogs, 30);
-    const healthScore = Math.max(
-      0,
-      Math.min(100, 100 - stats.averageDailyUnits * 10)
-    );
+    // Calculate overall health score (simplified and accurate)
+    const recentScores = Object.entries(dailyHealthScores)
+      .filter(([date]) => {
+        const scoreDate = new Date(date);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        return scoreDate >= thirtyDaysAgo;
+      })
+      .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime()) // Most recent first
+      .map(([date, score], index) => ({ date, score, daysAgo: index }));
+
+    // Calculate weighted average with exponential decay for recent days
+    let healthScore: number;
+
+    if (recentScores.length === 0) {
+      healthScore = 100;
+    } else {
+      let weightedSum = 0;
+      let totalWeight = 0;
+
+      recentScores.forEach(({ score, daysAgo }) => {
+        // Exponential decay: recent days have much higher weight
+        const weight = Math.exp(-daysAgo * 0.1); // 0.1 is decay factor
+        weightedSum += score * weight;
+        totalWeight += weight;
+      });
+
+      healthScore = Math.round(weightedSum / totalWeight);
+    }
 
     return {
       id: userId,
-      name: "User", // TODO: Get from user profile
+      name: "User",
       healthScore,
       lastDrinkDate,
       lastDrinkTimestamp,
@@ -169,7 +190,7 @@ export const useUser = (userId: string = "local-user") => {
 
   const userData = processUserData();
 
-  // More precise loading state - check if data is actually loaded
+  // More precise loading state
   const isLoading =
     preferencesData === undefined || drinkLogsData === undefined;
   const error = preferencesError || drinkLogsError;

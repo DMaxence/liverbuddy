@@ -177,7 +177,7 @@ export default function CalendarScreen() {
       ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
       const drinks = userData.drinks[dateString] || [];
 
-      const healthScore = userData.dailyHealthScores[dateString] || 100;
+      const healthScore = userData.dailyHealthScores[dateString] ?? 100;
       const liverState = getLiverStateByScore(healthScore);
 
       days.push({
@@ -488,10 +488,46 @@ export default function CalendarScreen() {
       >
         {selectedDay?.drinks.length === 0 ? (
           <BottomSheetView style={styles.modalContent}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionHeaderContent}>
+                <ThemedText style={styles.sectionHeaderText}>
+                  {selectedDay.date.toLocaleDateString(
+                    language === "fr" ? "fr-FR" : "en-US",
+                    {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }
+                  )}
+                </ThemedText>
+                {selectedDay && (
+                  <View style={styles.liverScoreContainer}>
+                    <Image
+                      source={
+                        liverImages[
+                          selectedDay.liverState as keyof typeof liverImages
+                        ]
+                      }
+                      style={styles.sectionLiverImage}
+                      resizeMode="contain"
+                    />
+                    <ThemedText style={styles.liverScoreText}>
+                      {selectedDay.healthScore ?? 100}/100
+                    </ThemedText>
+                  </View>
+                )}
+              </View>
+            </View>
             <View style={styles.emptyStateContainer}>
               <ThemedText style={styles.noDrinksText}>
                 {t("noDrinksLogged")}
               </ThemedText>
+              {selectedDay && selectedDay.healthScore < 100 && (
+                <ThemedText style={styles.liverRecoveringText}>
+                  {t("liverRecovering")}
+                </ThemedText>
+              )}
             </View>
           </BottomSheetView>
         ) : (
@@ -501,9 +537,27 @@ export default function CalendarScreen() {
             keyExtractor={(item: DrinkLog) => item.id}
             renderSectionHeader={({ section }) => (
               <View style={styles.sectionHeader}>
-                <ThemedText style={styles.sectionHeaderText}>
-                  {section.title}
-                </ThemedText>
+                <View style={styles.sectionHeaderContent}>
+                  <ThemedText style={styles.sectionHeaderText}>
+                    {section.title}
+                  </ThemedText>
+                  {selectedDay && (
+                    <View style={styles.liverScoreContainer}>
+                      <Image
+                        source={
+                          liverImages[
+                            selectedDay.liverState as keyof typeof liverImages
+                          ]
+                        }
+                        style={styles.sectionLiverImage}
+                        resizeMode="contain"
+                      />
+                      <ThemedText style={styles.liverScoreText}>
+                        {selectedDay.healthScore ?? 100}/100
+                      </ThemedText>
+                    </View>
+                  )}
+                </View>
               </View>
             )}
             renderItem={({ item }: { item: DrinkLog }) => {
@@ -751,6 +805,13 @@ const styles = StyleSheet.create({
     color: "#666",
     fontStyle: "italic",
   },
+  liverRecoveringText: {
+    fontSize: 14,
+    textAlign: "center",
+    color: "#FF6B35",
+    marginTop: 8,
+    fontStyle: "italic",
+  },
   flatListContent: {
     paddingHorizontal: 0,
     paddingBottom: 20,
@@ -783,10 +844,29 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
   },
+  sectionHeaderContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   sectionHeaderText: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#11181C",
+  },
+  liverScoreContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  sectionLiverImage: {
+    width: 32,
+    height: 32,
+  },
+  liverScoreText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#666",
   },
   loadingContainer: {
     flex: 1,

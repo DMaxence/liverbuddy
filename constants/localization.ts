@@ -125,6 +125,7 @@ export const translations = {
     worstDay: "Worst day",
     topDrinkType: "Top drink type",
     noDrinksLogged: "No drinks logged for this day! 🧠",
+    liverRecovering: "Your liver is still recovering from recent drinking 🫁",
     loadingCalendar: "Loading calendar...",
 
     // Stats
@@ -281,6 +282,7 @@ export const translations = {
     worstDay: "Pire jour",
     topDrinkType: "Type de boisson préféré",
     noDrinksLogged: "Aucune boisson enregistrée pour ce jour ! 🧠",
+    liverRecovering: "Votre foie se remet encore de la consommation récente 🫁",
     loadingCalendar: "Chargement du calendrier...",
 
     // Stats

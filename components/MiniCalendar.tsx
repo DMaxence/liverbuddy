@@ -26,7 +26,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({ onDayPress }) => {
       ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
       const isToday = date.toDateString() === today.toDateString();
-      const healthScore = userData?.dailyHealthScores[dateString] || 100;
+      const healthScore = userData?.dailyHealthScores[dateString] ?? 100;
       const liverState = getLiverStateByScore(healthScore);
 
       days.push({

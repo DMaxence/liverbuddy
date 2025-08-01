@@ -47,9 +47,9 @@ export default function HomeScreen() {
   const { userData } = useUser("local-user");
   const language = useLanguage();
   const { t } = useTranslation();
-  const baseLiverState = getLiverStateByScore(userData?.healthScore || 100);
+  const baseLiverState = getLiverStateByScore(userData?.healthScore ?? 100);
   const liverState = getLocalizedLiverState(baseLiverState, t);
-  const progressPercentage = ((userData?.healthScore || 100) / 100) * 100;
+  const progressPercentage = ((userData?.healthScore ?? 100) / 100) * 100;
 
   const greeting = getGreeting(language);
   const currentDate = formatDate(new Date(), language);
@@ -149,7 +149,7 @@ export default function HomeScreen() {
             resizeMode="contain"
           />
           <ThemedText style={styles.healthScore}>
-            {Math.round(userData?.healthScore || 100)}
+            {Math.round(userData?.healthScore ?? 100)}
           </ThemedText>
           <ThemedView style={styles.progressBarContainer}>
             <View

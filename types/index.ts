@@ -4,8 +4,6 @@ export interface User {
   username: string;
   avatar_url?: string;
   full_name?: string;
-  xp: number;
-  level: number;
   created_at: string;
   updated_at?: string;
   version?: string;
@@ -17,11 +15,7 @@ export interface User {
   timezone?: string;
   last_active_at?: string;
   deleted?: boolean;
-  nb_spots?: number;
   app_lang?: string;
-  app_notif_new_follower?: boolean;
-  app_notif_new_comment?: boolean;
-  app_notif_friend_new_spot?: boolean;
   preferred_drink_type: DrinkTypeKey;
   preferred_drink_option: DrinkOptionKey;
   favorite_drink?: string; // User's favorite drink name (e.g., "IPA", "Merlot")
@@ -178,6 +172,14 @@ export interface DrinkCalculation {
   alcohol_units: number; // Standard alcohol units (10g pure alcohol)
   display_amount: number;
   display_unit: UnitType;
+}
+
+// User profile for medical calculations
+export interface UserProfile {
+  age: number;
+  weight_kg: number;
+  gender: 'male' | 'female';
+  fitness_level: 'poor' | 'fair' | 'good' | 'excellent';
 }
 
 // Helper function to get localized liver state
