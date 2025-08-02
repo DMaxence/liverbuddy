@@ -1,15 +1,27 @@
 import { db } from "@/lib/database";
-import { userPreferences } from "@/lib/database/schema";
+import { user } from "@/lib/database/schema";
 import { DrinkOptionKey, DrinkTypeKey, PreferredUnit } from "@/types";
 import { eq } from "drizzle-orm";
 import * as Crypto from "expo-crypto";
 
 export interface UserPreferences {
-  preferred_drink_type: DrinkTypeKey;
-  preferred_drink_option: DrinkOptionKey;
+  favorite_drink_type: DrinkTypeKey;
+  favorite_drink_option: DrinkOptionKey;
   favorite_drink?: string;
   preferred_unit: PreferredUnit;
   weekly_goal: number;
+  weight_unit?: "kg" | "lbs";
+  app_language?: "en" | "fr";
+  // New user profile fields
+  age?: number;
+  weight_kg?: number;
+  gender?: "male" | "female";
+  activity_level?:
+    | "sedentary"
+    | "lightly_active"
+    | "moderately_active"
+    | "very_active";
+  drink_habits?: "rarely" | "occasionally" | "regularly" | "frequently";
 }
 
 // Get user preferences
@@ -19,8 +31,8 @@ export const getUserPreferences = async (
   try {
     const result = await db
       .select()
-      .from(userPreferences)
-      .where(eq(userPreferences.user_id, userId))
+      .from(user)
+      .where(eq(user.user_id, userId))
       .limit(1);
 
     if (result.length === 0) {
@@ -29,11 +41,22 @@ export const getUserPreferences = async (
 
     const prefs = result[0];
     return {
-      preferred_drink_type: prefs.preferred_drink_type || "beer",
-      preferred_drink_option: prefs.preferred_drink_option || "can",
+      favorite_drink_type: prefs.favorite_drink_type || "beer",
+      favorite_drink_option: prefs.favorite_drink_option || "can",
       favorite_drink: prefs.favorite_drink || undefined,
       preferred_unit: (prefs.preferred_unit as PreferredUnit) || "ml",
       weekly_goal: prefs.weekly_goal || 7,
+      weight_unit: (prefs.weight_unit as "kg" | "lbs") || "kg",
+      app_language: (prefs.app_language as "en" | "fr") || "en",
+      // New user profile fields
+      age: prefs.age || undefined,
+      weight_kg: prefs.weight_kg || undefined,
+      gender: (prefs.gender as UserPreferences["gender"]) || undefined,
+      activity_level:
+        (prefs.activity_level as UserPreferences["activity_level"]) ||
+        undefined,
+      drink_habits:
+        (prefs.drink_habits as UserPreferences["drink_habits"]) || undefined,
     };
   } catch (error) {
     console.error("Error getting user preferences:", error);
@@ -52,48 +75,66 @@ export const upsertUserPreferences = async (
     if (existing) {
       // Update existing preferences
       const result = await db
-        .update(userPreferences)
+        .update(user)
         .set({
           ...preferences,
           updated_at: new Date().toISOString(),
         })
-        .where(eq(userPreferences.user_id, userId))
+        .where(eq(user.user_id, userId))
         .returning();
 
       const updated = result[0];
       return {
-        preferred_drink_type: updated.preferred_drink_type || "beer",
-        preferred_drink_option: updated.preferred_drink_option || "can",
+        favorite_drink_type: updated.favorite_drink_type || "beer",
+        favorite_drink_option: updated.favorite_drink_option || "can",
         favorite_drink: updated.favorite_drink || undefined,
         preferred_unit: preferences.preferred_unit || "ml",
         weekly_goal: updated.weekly_goal || 7,
+        weight_unit: (updated.weight_unit as "kg" | "lbs") || "kg",
+        app_language: (updated.app_language as "en" | "fr") || "en",
+        age: updated.age || undefined,
+        weight_kg: updated.weight_kg || undefined,
+        gender: updated.gender as UserPreferences["gender"],
+        activity_level: updated.activity_level as UserPreferences["activity_level"],
+        drink_habits: updated.drink_habits as UserPreferences["drink_habits"],
       };
     } else {
       // Create new preferences
       const newPrefs = {
         id: Crypto.randomUUID(),
         user_id: userId,
-        preferred_drink_type: preferences.preferred_drink_type || "beer",
-        preferred_drink_option: preferences.preferred_drink_option || "can",
+        favorite_drink_type: preferences.favorite_drink_type || "beer",
+        favorite_drink_option: preferences.favorite_drink_option || "can",
         favorite_drink: preferences.favorite_drink,
         preferred_unit: preferences.preferred_unit || "ml",
         weekly_goal: preferences.weekly_goal || 7,
+        weight_unit: preferences.weight_unit || "kg",
+        app_language: preferences.app_language || "en",
+        age: preferences.age,
+        weight_kg: preferences.weight_kg,
+        gender: preferences.gender,
+        activity_level: preferences.activity_level,
+        drink_habits: preferences.drink_habits,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      const result = await db
-        .insert(userPreferences)
-        .values(newPrefs)
-        .returning();
+      const result = await db.insert(user).values(newPrefs).returning();
       const created = result[0];
 
       return {
-        preferred_drink_type: created.preferred_drink_type || "beer",
-        preferred_drink_option: created.preferred_drink_option || "can",
+        favorite_drink_type: created.favorite_drink_type || "beer",
+        favorite_drink_option: created.favorite_drink_option || "can",
         favorite_drink: created.favorite_drink || undefined,
         preferred_unit: (created.preferred_unit as PreferredUnit) || "ml",
         weekly_goal: created.weekly_goal || 7,
+        weight_unit: (created.weight_unit as "kg" | "lbs") || "kg",
+        app_language: (created.app_language as "en" | "fr") || "en",
+        age: created.age || undefined,
+        weight_kg: created.weight_kg || undefined,
+        gender: created.gender as UserPreferences["gender"],
+        activity_level: created.activity_level as UserPreferences["activity_level"],
+        drink_habits: created.drink_habits as UserPreferences["drink_habits"],
       };
     }
   } catch (error) {
@@ -108,7 +149,7 @@ export const updatePreferredDrinkType = async (
   drinkType: DrinkTypeKey
 ): Promise<void> => {
   try {
-    await upsertUserPreferences(userId, { preferred_drink_type: drinkType });
+    await upsertUserPreferences(userId, { favorite_drink_type: drinkType });
   } catch (error) {
     console.error("Error updating preferred drink type:", error);
     throw error;
@@ -122,7 +163,7 @@ export const updatePreferredDrinkOption = async (
 ): Promise<void> => {
   try {
     await upsertUserPreferences(userId, {
-      preferred_drink_option: drinkOption,
+      favorite_drink_option: drinkOption,
     });
   } catch (error) {
     console.error("Error updating preferred drink option:", error);

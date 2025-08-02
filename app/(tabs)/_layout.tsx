@@ -14,6 +14,14 @@ export default function TabLayout() {
 
   const currentRoute = usePathname();
 
+  const routesToExclude = [
+    "/",
+    "/settings",
+    "/app-preferences",
+    "/drinking-preferences",
+    "/personal-info",
+  ];
+
   return (
     <>
       <Tabs
@@ -54,9 +62,18 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: t("settings"),
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="gearshape" color={color} />
+            ),
+          }}
+        />
       </Tabs>
       {/* Only show DrinkModal on non-index routes */}
-      {currentRoute !== "/" && <DrinkModal />}
+      {!routesToExclude.includes(currentRoute) && <DrinkModal />}
     </>
   );
 }

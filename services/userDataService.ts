@@ -17,8 +17,8 @@ export interface UserData {
   recentLogs: DrinkLog[];
   drinks: { [date: string]: DrinkLog[] };
   dailyHealthScores: { [date: string]: number };
-  preferred_drink_type: DrinkTypeKey;
-  preferred_drink_option: DrinkOptionKey;
+  favorite_drink_type: DrinkTypeKey;
+  favorite_drink_option: DrinkOptionKey;
   favorite_drink?: string;
   preferred_unit: PreferredUnit;
 }
@@ -28,8 +28,8 @@ export const getUserData = async (userId: string): Promise<UserData> => {
   try {
     // Get user preferences
     const preferences = (await getUserPreferences(userId)) || {
-      preferred_drink_type: "beer" as DrinkTypeKey,
-      preferred_drink_option: "can" as DrinkOptionKey,
+      favorite_drink_type: "beer" as DrinkTypeKey,
+      favorite_drink_option: "can" as DrinkOptionKey,
       favorite_drink: undefined,
       preferred_unit: "ml",
       weekly_goal: 7,
@@ -117,8 +117,8 @@ export const getUserData = async (userId: string): Promise<UserData> => {
       recentLogs,
       drinks: drinksByDate,
       dailyHealthScores,
-      preferred_drink_type: preferences.preferred_drink_type,
-      preferred_drink_option: preferences.preferred_drink_option,
+      favorite_drink_type: preferences.favorite_drink_type,
+      favorite_drink_option: preferences.favorite_drink_option,
       favorite_drink: preferences.favorite_drink,
       preferred_unit: preferences.preferred_unit,
     };
@@ -135,8 +135,8 @@ export const getUserData = async (userId: string): Promise<UserData> => {
       recentLogs: [],
       drinks: {},
       dailyHealthScores: {},
-      preferred_drink_type: "beer" as DrinkTypeKey,
-      preferred_drink_option: "can" as DrinkOptionKey,
+      favorite_drink_type: "beer" as DrinkTypeKey,
+      favorite_drink_option: "can" as DrinkOptionKey,
       favorite_drink: undefined,
       preferred_unit: "ml" as PreferredUnit,
     };

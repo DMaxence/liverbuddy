@@ -1,6 +1,6 @@
 import { db } from "@/lib/database";
 import { calculateMedicalHealthScore } from "@/lib/database/calculations";
-import { DrinkLog, drinkLogs, userPreferences } from "@/lib/database/schema";
+import { DrinkLog, drinkLogs, user } from "@/lib/database/schema";
 import { useLanguage } from "@/stores/uiStore";
 import { DrinkOptionKey, DrinkTypeKey, PreferredUnit } from "@/types";
 import { eq } from "drizzle-orm";
@@ -17,8 +17,8 @@ export interface UserData {
   recentLogs: DrinkLog[];
   drinks: { [date: string]: DrinkLog[] };
   dailyHealthScores: { [date: string]: number };
-  preferred_drink_type: DrinkTypeKey;
-  preferred_drink_option: DrinkOptionKey;
+  favorite_drink_type: DrinkTypeKey;
+  favorite_drink_option: DrinkOptionKey;
   favorite_drink?: string;
   preferred_unit: PreferredUnit;
 }
@@ -28,11 +28,7 @@ export const useUser = (userId: string = "local-user") => {
 
   // Get user preferences with live query
   const { data: preferencesData, error: preferencesError } = useLiveQuery(
-    db
-      .select()
-      .from(userPreferences)
-      .where(eq(userPreferences.user_id, userId))
-      .limit(1)
+    db.select().from(user).where(eq(user.user_id, userId)).limit(1)
   );
 
   // Get all drink logs with live query
@@ -49,8 +45,8 @@ export const useUser = (userId: string = "local-user") => {
     const allLogs = drinkLogsData || [];
 
     const defaultPreferences = {
-      preferred_drink_type: "beer" as DrinkTypeKey,
-      preferred_drink_option: "can" as DrinkOptionKey,
+      favorite_drink_type: "beer" as DrinkTypeKey,
+      favorite_drink_option: "can" as DrinkOptionKey,
       favorite_drink: undefined,
       preferred_unit: (language === "en" ? "oz" : "ml") as PreferredUnit,
       weekly_goal: 7,
@@ -58,12 +54,12 @@ export const useUser = (userId: string = "local-user") => {
 
     const userPrefs = preferences
       ? {
-          preferred_drink_type:
-            preferences.preferred_drink_type ||
-            defaultPreferences.preferred_drink_type,
-          preferred_drink_option:
-            preferences.preferred_drink_option ||
-            defaultPreferences.preferred_drink_option,
+          favorite_drink_type:
+            preferences.favorite_drink_type ||
+            defaultPreferences.favorite_drink_type,
+          favorite_drink_option:
+            preferences.favorite_drink_option ||
+            defaultPreferences.favorite_drink_option,
           favorite_drink:
             preferences.favorite_drink || defaultPreferences.favorite_drink,
           preferred_unit:
@@ -102,9 +98,9 @@ export const useUser = (userId: string = "local-user") => {
       // Calculate health score for this date (includes recovery calculation for no-drink days)
       const score = calculateMedicalHealthScore(allLogs, dateString);
       dailyHealthScores[dateString] = score;
-      
+
       const drinkCount = drinksByDate[dateString]?.length || 0;
-      console.log(`Health score for ${dateString}: ${score} (${drinkCount} drinks)`);
+      // console.log(`Health score for ${dateString}: ${score} (${drinkCount} drinks)`);
     }
 
     // Get recent logs (last 3 days)
@@ -181,8 +177,8 @@ export const useUser = (userId: string = "local-user") => {
       recentLogs,
       drinks: drinksByDate,
       dailyHealthScores,
-      preferred_drink_type: userPrefs.preferred_drink_type,
-      preferred_drink_option: userPrefs.preferred_drink_option,
+      favorite_drink_type: userPrefs.favorite_drink_type,
+      favorite_drink_option: userPrefs.favorite_drink_option,
       favorite_drink: userPrefs.favorite_drink,
       preferred_unit: userPrefs.preferred_unit,
     };

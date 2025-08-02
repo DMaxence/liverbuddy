@@ -161,12 +161,70 @@ export const translations = {
     selectATime: "Select a time",
 
     // Common
+    back: "Back",
     error: "Error",
 
     // Not Found Screen
     oops: "Oops!",
     screenDoesNotExist: "This screen does not exist.",
     goToHomeScreen: "Go to home screen!",
+
+    // Settings
+    personalInfo: "Personal Info",
+    drinkingPreferences: "Drinking Preferences",
+    appPreferences: "App Preferences",
+    personalInfoSubtitle: "Age, gender, weight, activity level",
+    drinkingPreferencesSubtitle: "Habits, favorites, weekly goals",
+    appPreferencesSubtitle: "Language, units, display options",
+    age: "Age",
+    gender: "Gender",
+    weight: "Weight",
+    activityLevel: "Activity Level",
+    drinkHabits: "Drink Habits",
+    favoriteDrinkType: "Favorite Drink Type",
+    favoriteDrinkOption: "Favorite Drink Option",
+    favoriteDrinkName: "Favorite Drink Name",
+    weeklyGoal: "Weekly Goal",
+    language: "Language",
+    weightUnit: "Weight Unit",
+    quantityUnit: "Quantity Unit",
+    
+    // Gender options
+    male: "Male",
+    female: "Female",
+    nonBinary: "Non-binary",
+    preferNotToSay: "Prefer not to say",
+    
+    // Activity level options
+    sedentary: "Sedentary",
+    lightlyActive: "Lightly Active", 
+    moderatelyActive: "Moderately Active",
+    veryActive: "Very Active",
+    
+    // Drink habits options
+    rarely: "Rarely (0-1 times/week)",
+    occasionally: "Occasionally (2-3 times/week)",
+    regularly: "Regularly (4-5 times/week)",
+    frequently: "Frequently (6+ times/week)",
+    
+    // Form labels
+    ageYears: "years old",
+    weightKg: "kg",
+    weightLbs: "lbs",
+    drinksPerWeek: "drinks per week",
+    english: "English",
+    french: "French",
+    kilograms: "Kilograms",
+    pounds: "Pounds",
+    milliliters: "Milliliters",
+    ounces: "Ounces",
+    save: "Save",
+    saved: "Saved!",
+    pleaseEnterAge: "Please enter your age",
+    pleaseSelectGender: "Please select your gender",
+    pleaseEnterWeight: "Please enter your weight",
+    settingsSaved: "Settings saved successfully!",
+    settingsError: "Failed to save settings",
   },
   fr: {
     // Navigation
@@ -318,12 +376,70 @@ export const translations = {
     selectATime: "Sélectionner une heure",
 
     // Common
+    back: "Retour",
     error: "Erreur",
 
     // Not Found Screen
     oops: "Oups !",
     screenDoesNotExist: "Cet écran n'existe pas.",
     goToHomeScreen: "Aller à l'écran d'accueil !",
+
+    // Settings
+    personalInfo: "Informations Personnelles",
+    drinkingPreferences: "Préférences de Consommation",
+    appPreferences: "Préférences de l'App",
+    personalInfoSubtitle: "Âge, genre, poids, niveau d'activité",
+    drinkingPreferencesSubtitle: "Habitudes, préférés, objectifs hebdomadaires",
+    appPreferencesSubtitle: "Langue, unités, options d'affichage",
+    age: "Âge",
+    gender: "Genre",
+    weight: "Poids",
+    activityLevel: "Niveau d'Activité",
+    drinkHabits: "Habitudes de Consommation",
+    favoriteDrinkType: "Type de Boisson Préféré",
+    favoriteDrinkOption: "Option de Boisson Préférée",
+    favoriteDrinkName: "Nom de la Boisson Préférée",
+    weeklyGoal: "Objectif Hebdomadaire",
+    language: "Langue",
+    weightUnit: "Unité de Poids",
+    quantityUnit: "Unité de Quantité",
+    
+    // Gender options
+    male: "Homme",
+    female: "Femme",
+    nonBinary: "Non-binaire",
+    preferNotToSay: "Préfère ne pas dire",
+    
+    // Activity level options
+    sedentary: "Sédentaire",
+    lightlyActive: "Actif Légèrement", 
+    moderatelyActive: "Actif Modérément",
+    veryActive: "Très Actif",
+    
+    // Drink habits options
+    rarely: "Rarement (0-1 fois/semaine)",
+    occasionally: "Occasionnellement (2-3 fois/semaine)",
+    regularly: "Régulièrement (4-5 fois/semaine)",
+    frequently: "Fréquemment (6+ fois/semaine)",
+    
+    // Form labels
+    ageYears: "ans",
+    weightKg: "kg",
+    weightLbs: "lbs",
+    drinksPerWeek: "verres par semaine",
+    english: "Anglais",
+    french: "Français",
+    kilograms: "Kilogrammes",
+    pounds: "Livres",
+    milliliters: "Millilitres",
+    ounces: "Onces",
+    save: "Enregistrer",
+    saved: "Enregistré !",
+    pleaseEnterAge: "Veuillez entrer votre âge",
+    pleaseSelectGender: "Veuillez sélectionner votre genre",
+    pleaseEnterWeight: "Veuillez entrer votre poids",
+    settingsSaved: "Paramètres enregistrés avec succès !",
+    settingsError: "Échec de l'enregistrement des paramètres",
   },
 } as const;
 

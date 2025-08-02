@@ -8,7 +8,7 @@ export const resetDatabase = async () => {
     // Drop existing tables
     await sqlite.execAsync(`
       DROP TABLE IF EXISTS drink_logs;
-      DROP TABLE IF EXISTS user_preferences;
+      DROP TABLE IF EXISTS user;
     `);
     
     console.log('Database reset complete. Restart the app to reinitialize.');
@@ -31,25 +31,25 @@ export const checkDatabaseSchema = async () => {
     }
     
     try {
-      await sqlite.execAsync(`SELECT COUNT(*) FROM user_preferences LIMIT 1`);
-      console.log('✅ user_preferences table exists');
+      await sqlite.execAsync(`SELECT COUNT(*) FROM user LIMIT 1`);
+      console.log('✅ user table exists');
     } catch (error) {
-      console.log('❌ user_preferences table does not exist');
+      console.log('❌ user table does not exist');
     }
     
     // Try to check if the new columns exist by selecting them
     try {
-      await sqlite.execAsync(`SELECT preferred_drink_type FROM user_preferences LIMIT 1`);
-      console.log('✅ preferred_drink_type column exists');
+      await sqlite.execAsync(`SELECT favorite_drink_type FROM user LIMIT 1`);
+      console.log('✅ favorite_drink_type column exists');
     } catch (error) {
-      console.log('❌ preferred_drink_type column does not exist');
+      console.log('❌ favorite_drink_type column does not exist');
     }
     
     try {
-      await sqlite.execAsync(`SELECT preferred_drink_option FROM user_preferences LIMIT 1`);
-      console.log('✅ preferred_drink_option column exists');
+      await sqlite.execAsync(`SELECT favorite_drink_option FROM user LIMIT 1`);
+      console.log('✅ favorite_drink_option column exists');
     } catch (error) {
-      console.log('❌ preferred_drink_option column does not exist');
+      console.log('❌ favorite_drink_option column does not exist');
     }
     
   } catch (error) {

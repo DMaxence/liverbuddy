@@ -10,8 +10,8 @@ export const addSampleData = async () => {
     // Add user preferences
     console.log('Adding user preferences...');
     await upsertUserPreferences('local-user', {
-      preferred_drink_type: 'beer' as DrinkTypeKey,
-      preferred_drink_option: 'pint' as DrinkOptionKey,
+      favorite_drink_type: 'beer' as DrinkTypeKey,
+      favorite_drink_option: 'pint' as DrinkOptionKey,
       favorite_drink: 'IPA',
       preferred_unit: 'ml',
       weekly_goal: 7,

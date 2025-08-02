@@ -124,15 +124,15 @@ export const getQuickAddButtonText = (
   } else {
     // 4 PM to 2 AM: show preferred drink
     const drinkTypeName = getTranslation(
-      userData?.preferred_drink_type || "beer",
+      userData?.favorite_drink_type || "beer",
       language
     );
     const drinkOptionName = getTranslation(
-      userData?.preferred_drink_option || "can",
+      userData?.favorite_drink_option || "can",
       language
     );
     const drinkEmoji = getDrinkTypeEmoji(
-      userData?.preferred_drink_type || "beer"
+      userData?.favorite_drink_type || "beer"
     );
     return {
       text: `${getTranslation(

@@ -48,19 +48,19 @@ export const useNewDrinkForm = (
   // Helper functions to get default values
   const getSelectedDrinkType = useCallback(() => {
     return (
-      drinkTypes.find((type) => type.id === userData.preferred_drink_type) ||
+      drinkTypes.find((type) => type.id === userData.favorite_drink_type) ||
       drinkTypes[0]
     );
-  }, [drinkTypes, userData.preferred_drink_type]);
+  }, [drinkTypes, userData.favorite_drink_type]);
 
   const getSelectedOption = useCallback(() => {
     const type = getSelectedDrinkType();
     return (
       type.options.find(
-        (option) => option.key === userData.preferred_drink_option
+        (option) => option.key === userData.favorite_drink_option
       ) || type.options[0]
     );
-  }, [getSelectedDrinkType, userData.preferred_drink_option]);
+  }, [getSelectedDrinkType, userData.favorite_drink_option]);
 
   // Create initial state - memoized to prevent unnecessary recreations
   const createInitialState = useCallback(

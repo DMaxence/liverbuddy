@@ -1,6 +1,6 @@
 import * as SQLite from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
-import { drinkLogs, userPreferences } from "./schema";
+import { drinkLogs, user } from "./schema";
 
 // Open the database
 const sqlite = SQLite.openDatabaseSync("liverbuddy.db", {
@@ -8,7 +8,7 @@ const sqlite = SQLite.openDatabaseSync("liverbuddy.db", {
 });
 
 // Create Drizzle instance
-export const db = drizzle(sqlite, { schema: { drinkLogs, userPreferences } });
+export const db = drizzle(sqlite, { schema: { drinkLogs, user } });
 
 // Initialize database with tables
 export const initDatabase = async () => {
@@ -29,14 +29,21 @@ export const initDatabase = async () => {
         updated_at TEXT
       );
 
-      CREATE TABLE IF NOT EXISTS user_preferences (
+      CREATE TABLE IF NOT EXISTS user (
         id TEXT PRIMARY KEY NOT NULL,
         user_id TEXT NOT NULL UNIQUE,
-        preferred_drink_type TEXT NOT NULL CHECK (preferred_drink_type IN ('beer', 'wine', 'cocktail', 'spirits', 'other')),
-        preferred_drink_option TEXT NOT NULL CHECK (preferred_drink_option IN ('can', 'bottle', 'pint', 'large', 'glass', 'large_glass', 'standard', 'strong', 'double', 'shot', 'tall', 'small', 'medium', 'extra_large')),
+        favorite_drink_type TEXT NOT NULL CHECK (favorite_drink_type IN ('beer', 'wine', 'cocktail', 'spirits', 'other')),
+        favorite_drink_option TEXT NOT NULL CHECK (favorite_drink_option IN ('can', 'bottle', 'pint', 'large', 'glass', 'large_glass', 'standard', 'strong', 'double', 'shot', 'tall', 'small', 'medium', 'extra_large')),
         favorite_drink TEXT,
         preferred_unit TEXT DEFAULT 'ml' CHECK (preferred_unit IN ('ml', 'oz')),
         weekly_goal INTEGER DEFAULT 7,
+        weight_unit TEXT DEFAULT 'kg' CHECK (weight_unit IN ('kg', 'lbs')),
+        app_language TEXT DEFAULT 'en' CHECK (app_language IN ('en', 'fr')),
+        age INTEGER,
+        weight_kg REAL,
+        gender TEXT CHECK (gender IN ('male', 'female')),
+        activity_level TEXT CHECK (activity_level IN ('sedentary', 'lightly_active', 'moderately_active', 'very_active')),
+        drink_habits TEXT CHECK (drink_habits IN ('rarely', 'occasionally', 'regularly', 'frequently')),
         created_at TEXT NOT NULL,
         updated_at TEXT
       );

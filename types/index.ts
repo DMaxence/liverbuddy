@@ -16,8 +16,8 @@ export interface User {
   last_active_at?: string;
   deleted?: boolean;
   app_lang?: string;
-  preferred_drink_type: DrinkTypeKey;
-  preferred_drink_option: DrinkOptionKey;
+  favorite_drink_type: DrinkTypeKey;
+  favorite_drink_option: DrinkOptionKey;
   favorite_drink?: string; // User's favorite drink name (e.g., "IPA", "Merlot")
 }
 
@@ -113,24 +113,24 @@ export const UNIT_CONVERSIONS = {
 export type UnitType = keyof typeof UNIT_CONVERSIONS;
 
 // Drink option keys for better maintainability
-export type DrinkOptionKey = 
-  | 'can' 
-  | 'bottle' 
-  | 'pint' 
-  | 'large' 
-  | 'glass' 
-  | 'large_glass' 
-  | 'standard' 
-  | 'strong' 
-  | 'double' 
-  | 'shot'
-  | 'tall'
-  | 'small'
-  | 'medium'
-  | 'extra_large';
+export type DrinkOptionKey =
+  | "can"
+  | "bottle"
+  | "pint"
+  | "large"
+  | "glass"
+  | "large_glass"
+  | "standard"
+  | "strong"
+  | "double"
+  | "shot"
+  | "tall"
+  | "small"
+  | "medium"
+  | "extra_large";
 
 // Drink type keys
-export type DrinkTypeKey = 'beer' | 'wine' | 'cocktail' | 'spirits' | 'other';
+export type DrinkTypeKey = "beer" | "wine" | "cocktail" | "spirits" | "other";
 
 // Generic drink option structure
 export interface DrinkOption {
@@ -178,14 +178,24 @@ export interface DrinkCalculation {
 export interface UserProfile {
   age: number;
   weight_kg: number;
-  gender: 'male' | 'female';
-  fitness_level: 'poor' | 'fair' | 'good' | 'excellent';
+  gender: "male" | "female";
+  activity_level:
+    | "sedentary"
+    | "lightly_active"
+    | "moderately_active"
+    | "very_active";
+  drink_habits: "rarely" | "occasionally" | "regularly" | "frequently";
+  favorite_drink_type?: DrinkTypeKey;
+  favorite_drink_option?: DrinkOptionKey;
+  favorite_drink?: string;
 }
 
 // Helper function to get localized liver state
 export const getLocalizedLiverState = (
   liverState: LiverState,
-  getTranslation: (key: keyof typeof import("@/constants/localization").translations.en) => string
+  getTranslation: (
+    key: keyof typeof import("@/constants/localization").translations.en
+  ) => string
 ) => {
   return {
     ...liverState,
