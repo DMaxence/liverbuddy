@@ -94,7 +94,7 @@ export const translations = {
     of: "of",
     addDrink: "Add drink",
     addLastNightDrinks: "Add last night drinks",
-    
+
     // Toast Messages
     drinkAddedSuccess: "Drink logged successfully!",
     drinkAddedToast: "Added", // Used in toast: "Added [amount] [drink] 🍺"
@@ -108,14 +108,17 @@ export const translations = {
     runningOnRegret: "Running on Regret",
     deeplyConcerned: "Deeply Concerned",
     legallyDeceased: "Legally Deceased",
-    
+
     // Liver State Descriptions
     perfectlyHealthyDescription: "I'm basically a green smoothie with legs.",
     kindaVibingDescription: "One drink won't hurt… right?",
     lowkeyStrugglingDescription: "We're still fine. Technically.",
-    runningOnRegretDescription: "The liver is working overtime with no union rights.",
-    deeplyConcernedDescription: "You've turned your liver into a part-time bartender.",
-    legallyDeceasedDescription: "Not a liver. Just emotional baggage in organ form.",
+    runningOnRegretDescription:
+      "The liver is working overtime with no union rights.",
+    deeplyConcernedDescription:
+      "You've turned your liver into a part-time bartender.",
+    legallyDeceasedDescription:
+      "Not a liver. Just emotional baggage in organ form.",
 
     // Calendar
     drinkingCalendar: "Drinking Calendar",
@@ -138,7 +141,8 @@ export const translations = {
     edit: "Edit",
     done: "Done",
     deleteSelectedDrinks: "Delete Selected Drinks",
-    deleteSelectedDrinksMessage: "Are you sure you want to delete {count} drink{plural}?",
+    deleteSelectedDrinksMessage:
+      "Are you sure you want to delete {count} drink{plural}?",
     deleteDrink: "Delete Drink",
     actions: "Actions",
     deleteItem: "Delete {count} item{plural}",
@@ -188,25 +192,25 @@ export const translations = {
     language: "Language",
     weightUnit: "Weight Unit",
     quantityUnit: "Quantity Unit",
-    
+
     // Gender options
     male: "Male",
     female: "Female",
     nonBinary: "Non-binary",
     preferNotToSay: "Prefer not to say",
-    
+
     // Activity level options
     sedentary: "Sedentary",
-    lightlyActive: "Lightly Active", 
+    lightlyActive: "Lightly Active",
     moderatelyActive: "Moderately Active",
     veryActive: "Very Active",
-    
+
     // Drink habits options
     rarely: "Rarely (0-1 times/week)",
     occasionally: "Occasionally (2-3 times/week)",
     regularly: "Regularly (4-5 times/week)",
     frequently: "Frequently (6+ times/week)",
-    
+
     // Form labels
     ageYears: "years old",
     weightKg: "kg",
@@ -225,6 +229,16 @@ export const translations = {
     pleaseEnterWeight: "Please enter your weight",
     settingsSaved: "Settings saved successfully!",
     settingsError: "Failed to save settings",
+
+    // Credits
+    credits: "Developed with ❤️ and 🍺",
+    version: "Version",
+    customizeExperience: "Customize your LiverBuddy experience",
+    
+    // App Preferences
+    accurateCalculations: "Accurate Calculations",
+    advanced: "Advanced",
+    simple: "Simple",
   },
   fr: {
     // Navigation
@@ -309,7 +323,7 @@ export const translations = {
     of: "de",
     addDrink: "Ajouter une boisson",
     addLastNightDrinks: "Ajouter les boissons d'hier soir",
-    
+
     // Toast Messages
     drinkAddedSuccess: "Boisson enregistrée avec succès !",
     drinkAddedToast: "Ajouté", // Used in toast: "Ajouté [amount] [drink] 🍺"
@@ -323,14 +337,18 @@ export const translations = {
     runningOnRegret: "Survit sur les Regrets",
     deeplyConcerned: "Profondément Inquiet",
     legallyDeceased: "Légalement Décédé",
-    
+
     // Liver State Descriptions
-    perfectlyHealthyDescription: "Je suis pratiquement un smoothie vert avec des jambes.",
+    perfectlyHealthyDescription:
+      "Je suis pratiquement un smoothie vert avec des jambes.",
     kindaVibingDescription: "Un verre ne peut pas faire de mal… non ?",
     lowkeyStrugglingDescription: "On s'en sort encore. Techniquement.",
-    runningOnRegretDescription: "Le foie travaille en surtemps sans droits syndicaux.",
-    deeplyConcernedDescription: "Tu as transformé ton foie en barman à temps partiel.",
-    legallyDeceasedDescription: "Pas un foie. Juste des bagages émotionnels sous forme d'organe.",
+    runningOnRegretDescription:
+      "Le foie travaille en surtemps sans droits syndicaux.",
+    deeplyConcernedDescription:
+      "Tu as transformé ton foie en barman à temps partiel.",
+    legallyDeceasedDescription:
+      "Pas un foie. Juste des bagages émotionnels sous forme d'organe.",
 
     // Calendar
     drinkingCalendar: "Calendrier de Consommation",
@@ -353,7 +371,8 @@ export const translations = {
     edit: "Modifier",
     done: "Terminé",
     deleteSelectedDrinks: "Supprimer les Boissons Sélectionnées",
-    deleteSelectedDrinksMessage: "Êtes-vous sûr de vouloir supprimer {count} boisson{plural} ?",
+    deleteSelectedDrinksMessage:
+      "Êtes-vous sûr de vouloir supprimer {count} boisson{plural} ?",
     deleteDrink: "Supprimer la Boisson",
     actions: "Actions",
     deleteItem: "Supprimer {count} élément{plural}",
@@ -403,25 +422,25 @@ export const translations = {
     language: "Langue",
     weightUnit: "Unité de Poids",
     quantityUnit: "Unité de Quantité",
-    
+
     // Gender options
     male: "Homme",
     female: "Femme",
     nonBinary: "Non-binaire",
     preferNotToSay: "Préfère ne pas dire",
-    
+
     // Activity level options
     sedentary: "Sédentaire",
-    lightlyActive: "Actif Légèrement", 
+    lightlyActive: "Actif Légèrement",
     moderatelyActive: "Actif Modérément",
     veryActive: "Très Actif",
-    
+
     // Drink habits options
     rarely: "Rarement (0-1 fois/semaine)",
     occasionally: "Occasionnellement (2-3 fois/semaine)",
     regularly: "Régulièrement (4-5 fois/semaine)",
     frequently: "Fréquemment (6+ fois/semaine)",
-    
+
     // Form labels
     ageYears: "ans",
     weightKg: "kg",
@@ -440,6 +459,16 @@ export const translations = {
     pleaseEnterWeight: "Veuillez entrer votre poids",
     settingsSaved: "Paramètres enregistrés avec succès !",
     settingsError: "Échec de l'enregistrement des paramètres",
+
+    // Credits
+    credits: "Développé avec ❤️ et 🍺",
+    version: "Version",
+    customizeExperience: "Personnalisez votre expérience LiverBuddy",
+    
+    // App Preferences
+    accurateCalculations: "Calculs Précis",
+    advanced: "Avancé",
+    simple: "Simple",
   },
 } as const;
 

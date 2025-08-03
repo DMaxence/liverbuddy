@@ -4,16 +4,6 @@ import { UserData } from "@/services/userDataService";
 import { AppLanguage } from "@/types";
 import { getDrinkTypeEmoji } from "./drinks";
 
-export interface DrinkLog {
-  id: string;
-  type: "beer" | "wine" | "cocktail" | "custom";
-  name: string;
-  amount: number;
-  unit: string;
-  timestamp: string;
-  emoji: string;
-}
-
 // Helper functions
 export const getGreeting = (language: AppLanguage): string => {
   const hour = new Date().getHours();

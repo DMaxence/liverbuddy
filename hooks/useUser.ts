@@ -1,8 +1,8 @@
 import { db } from "@/lib/database";
-import { calculateMedicalHealthScore } from "@/lib/database/calculations";
+import { calculateMedicalHealthScore, calculateLiverHealth, DayLog } from "@/lib/database/calculations";
 import { DrinkLog, drinkLogs, user } from "@/lib/database/schema";
-import { useLanguage } from "@/stores/uiStore";
-import { DrinkOptionKey, DrinkTypeKey, PreferredUnit } from "@/types";
+import { useLanguage, useAccurate } from "@/stores/uiStore";
+import { DrinkOptionKey, DrinkTypeKey, PreferredUnit, UserProfile } from "@/types";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 
@@ -25,6 +25,7 @@ export interface UserData {
 
 export const useUser = (userId: string = "local-user") => {
   const language = useLanguage();
+  const accurateCalculations = useAccurate();
 
   // Get user preferences with live query
   const { data: preferencesData, error: preferencesError } = useLiveQuery(
@@ -83,8 +84,33 @@ export const useUser = (userId: string = "local-user") => {
       drinksByDate[dateString].push(log);
     });
 
-    // Calculate daily health scores using medically accurate algorithm
+    // Calculate daily health scores using selected algorithm (accurate or simple)
     const dailyHealthScores: { [date: string]: number } = {};
+
+    // Default user profile for calculations (can be enhanced later with actual user data)
+    const defaultUserProfile: UserProfile = {
+      age: 30,
+      weight_kg: 70,
+      gender: "male",
+      activity_level: "moderately_active",
+      drink_habits: "occasionally"
+    };
+
+    // Prepare day logs for the calculation methods
+    const dayLogs: DayLog[] = [];
+    // Create day logs for the last 30 days for context in calculations
+    for (let i = 0; i < 30; i++) {
+      const checkDate = new Date();
+      checkDate.setDate(checkDate.getDate() - i);
+      const dateString = `${checkDate.getFullYear()}-${String(
+        checkDate.getMonth() + 1
+      ).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
+      
+      dayLogs.push({
+        date: checkDate,
+        drinks: drinksByDate[dateString] || []
+      });
+    }
 
     // Calculate scores for all recent days (last 30 days)
     const currentDate = new Date();
@@ -95,12 +121,25 @@ export const useUser = (userId: string = "local-user") => {
         checkDate.getMonth() + 1
       ).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
 
-      // Calculate health score for this date (includes recovery calculation for no-drink days)
-      const score = calculateMedicalHealthScore(allLogs, dateString);
+      let score: number;
+      
+      console.log(`Calculating for ${dateString}, accurateCalculations: ${accurateCalculations}`);
+      
+      if (accurateCalculations) {
+        // Use existing accurate calculation method (legacy medical health score)
+        score = calculateMedicalHealthScore(allLogs, dateString);
+      } else {
+        // Use new simple calculation method
+        const liverHealth = calculateLiverHealth(dayLogs, defaultUserProfile, checkDate, false);
+        score = liverHealth.daily_score * 10; // Convert 0-10 scale to 0-100 for display
+      }
+      
       dailyHealthScores[dateString] = score;
 
       const drinkCount = drinksByDate[dateString]?.length || 0;
-      // console.log(`Health score for ${dateString}: ${score} (${drinkCount} drinks)`);
+      if (drinkCount > 0) {
+        console.log(`Health score for ${dateString}: ${score} (${drinkCount} drinks) - Mode: ${accurateCalculations ? 'Accurate' : 'Simple'}`);
+      }
     }
 
     // Get recent logs (last 3 days)

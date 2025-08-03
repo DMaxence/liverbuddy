@@ -1,16 +1,12 @@
 import React from "react";
-import {
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, ScrollView, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTranslation } from "@/hooks/useTranslation";
 import { router } from "expo-router";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import Constants from "expo-constants";
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -48,42 +44,57 @@ export default function SettingsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <ThemedText style={styles.title}>{t("settings")} ⚙️</ThemedText>
-          <ThemedText style={styles.subtitle}>
-            Customize your LiverBuddy experience
-          </ThemedText>
-        </View>
+      {/* <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      > */}
+      {/* Header */}
+      <View style={styles.header}>
+        <ThemedText style={styles.title}>{t("settings")} ⚙️</ThemedText>
+        <ThemedText style={styles.subtitle}>
+          {t("customizeExperience")}
+        </ThemedText>
+      </View>
 
-        {/* Settings Options */}
-        <View style={styles.settingsContainer}>
-          {settingsOptions.map((option, index) => (
-            <TouchableOpacity
-              key={option.id}
-              style={[
-                styles.settingOption,
-                index === settingsOptions.length - 1 && styles.lastSettingOption,
-              ]}
-              onPress={() => handleOptionPress(option.route)}
-            >
-              <View style={styles.settingContent}>
-                <View style={styles.settingLeft}>
-                  <View style={styles.iconContainer}>
-                    <ThemedText style={styles.settingEmoji}>{option.emoji}</ThemedText>
-                  </View>
-                  <View style={styles.settingTextContainer}>
-                    <ThemedText style={styles.settingTitle}>{option.title}</ThemedText>
-                    <ThemedText style={styles.settingSubtitle}>{option.subtitle}</ThemedText>
-                  </View>
+      {/* Settings Options */}
+      <View style={styles.settingsContainer}>
+        {settingsOptions.map((option, index) => (
+          <TouchableOpacity
+            key={option.id}
+            style={[
+              styles.settingOption,
+              index === settingsOptions.length - 1 && styles.lastSettingOption,
+            ]}
+            onPress={() => handleOptionPress(option.route)}
+          >
+            <View style={styles.settingContent}>
+              <View style={styles.settingLeft}>
+                <View style={styles.iconContainer}>
+                  <ThemedText style={styles.settingEmoji}>
+                    {option.emoji}
+                  </ThemedText>
                 </View>
-                <IconSymbol name="chevron.right" size={16} color="#C7C7CC" />
+                <View style={styles.settingTextContainer}>
+                  <ThemedText style={styles.settingTitle}>
+                    {option.title}
+                  </ThemedText>
+                  <ThemedText style={styles.settingSubtitle}>
+                    {option.subtitle}
+                  </ThemedText>
+                </View>
               </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+              <IconSymbol name="chevron.right" size={16} color="#C7C7CC" />
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View style={styles.footer}>
+        <ThemedText style={styles.footerText}>{t("credits")}</ThemedText>
+        <ThemedText style={styles.footerText}>
+          {t("version")} {Constants.expoConfig?.version}
+        </ThemedText>
+      </View>
+      {/* </ScrollView> */}
     </ThemedView>
   );
 }
@@ -169,6 +180,17 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   settingSubtitle: {
+    fontSize: 14,
+    color: "#666",
+  },
+  footer: {
+    marginTop: "auto",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  footerText: {
     fontSize: 14,
     color: "#666",
   },

@@ -6,7 +6,7 @@ import {
   getUserPreferences,
   upsertUserPreferences,
 } from "@/services/userPreferencesService";
-import { useLanguage, useSetLanguage } from "@/stores/uiStore";
+import { useLanguage, useSetLanguage, useAccurate, useSetAccurate } from "@/stores/uiStore";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -19,6 +19,8 @@ export default function AppPreferencesScreen() {
   const { t } = useTranslation();
   const currentLanguage = useLanguage();
   const setLanguage = useSetLanguage();
+  const accurateCalculations = useAccurate();
+  const setAccurateCalculations = useSetAccurate();
 
   // App Preferences
   const [appLanguage, setAppLanguage] = useState<"en" | "fr">(currentLanguage);
@@ -156,7 +158,50 @@ export default function AppPreferencesScreen() {
                 ],
                 quantityUnit,
                 setQuantityUnit
-              ),
+              )
+            )}
+            {renderSettingRow(
+              t("accurateCalculations"),
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.pillContainer}
+              >
+                <TouchableOpacity
+                  style={[
+                    styles.pill,
+                    accurateCalculations && styles.selectedPill,
+                  ]}
+                  onPress={() => setAccurateCalculations(true)}
+                >
+                  <ThemedText style={styles.pillEmoji}>🧮</ThemedText>
+                  <ThemedText
+                    style={[
+                      styles.pillText,
+                      accurateCalculations && styles.selectedPillText,
+                    ]}
+                  >
+                    {t("advanced")}
+                  </ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.pill,
+                    !accurateCalculations && styles.selectedPill,
+                  ]}
+                  onPress={() => setAccurateCalculations(false)}
+                >
+                  <ThemedText style={styles.pillEmoji}>🎯</ThemedText>
+                  <ThemedText
+                    style={[
+                      styles.pillText,
+                      !accurateCalculations && styles.selectedPillText,
+                    ]}
+                  >
+                    {t("simple")}
+                  </ThemedText>
+                </TouchableOpacity>
+              </ScrollView>,
               true
             )}
           </View>
