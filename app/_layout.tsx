@@ -136,6 +136,29 @@ function RootLayoutContent() {
                   },
                 }}
               />
+              <Stack.Screen
+                name="support"
+                options={{
+                  title: t("support"),
+                  headerLeft: () => (
+                    <TouchableOpacity
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                      onPress={() => router.back()}
+                    >
+                      <IconSymbol name="chevron.left" size={24} color="black" />
+                      <ThemedText style={{ color: Colors.light.tint }}>
+                        {t("back")}
+                      </ThemedText>
+                    </TouchableOpacity>
+                  ),
+                  headerTitleStyle: {
+                    color: Colors.light.tint,
+                  },
+                  headerStyle: {
+                    backgroundColor: Colors.light.background,
+                  },
+                }}
+              />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="dark" />

@@ -11,7 +11,7 @@ import Constants from "expo-constants";
 export default function SettingsScreen() {
   const { t } = useTranslation();
 
-  const settingsOptions = [
+  const personalSettings = [
     {
       id: "personal-info",
       title: t("personalInfo"),
@@ -28,6 +28,9 @@ export default function SettingsScreen() {
       emoji: "🍻",
       route: "/drinking-preferences",
     },
+  ];
+
+  const appSettings = [
     {
       id: "app-preferences",
       title: t("appPreferences"),
@@ -38,63 +41,104 @@ export default function SettingsScreen() {
     },
   ];
 
+  const supportSettings = [
+    {
+      id: "support",
+      title: t("support"),
+      subtitle: t("supportSubtitle"),
+      icon: "questionmark.circle.fill",
+      emoji: "❓",
+      route: "/support",
+    },
+  ];
+
+  const settingsOptions = [
+    {
+      id: "personal-settings",
+      title: t("personalSettings"),
+      options: personalSettings,
+    },
+    {
+      id: "app-settings",
+      title: t("appSettings"),
+      options: appSettings,
+    },
+    {
+      id: "support-settings",
+      title: t("supportSettings"),
+      options: supportSettings,
+    },
+  ];
+
   const handleOptionPress = (route: string) => {
     router.push(route as any);
   };
 
   return (
     <ThemedView style={styles.container}>
-      {/* <ScrollView
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-      > */}
-      {/* Header */}
-      <View style={styles.header}>
-        <ThemedText style={styles.title}>{t("settings")} ⚙️</ThemedText>
-        <ThemedText style={styles.subtitle}>
-          {t("customizeExperience")}
-        </ThemedText>
-      </View>
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <ThemedText style={styles.title}>{t("settings")} ⚙️</ThemedText>
+          <ThemedText style={styles.subtitle}>
+            {t("customizeExperience")}
+          </ThemedText>
+        </View>
 
-      {/* Settings Options */}
-      <View style={styles.settingsContainer}>
+        {/* Settings Options */}
         {settingsOptions.map((option, index) => (
-          <TouchableOpacity
-            key={option.id}
-            style={[
-              styles.settingOption,
-              index === settingsOptions.length - 1 && styles.lastSettingOption,
-            ]}
-            onPress={() => handleOptionPress(option.route)}
-          >
-            <View style={styles.settingContent}>
-              <View style={styles.settingLeft}>
-                <View style={styles.iconContainer}>
-                  <ThemedText style={styles.settingEmoji}>
-                    {option.emoji}
-                  </ThemedText>
-                </View>
-                <View style={styles.settingTextContainer}>
-                  <ThemedText style={styles.settingTitle}>
-                    {option.title}
-                  </ThemedText>
-                  <ThemedText style={styles.settingSubtitle}>
-                    {option.subtitle}
-                  </ThemedText>
-                </View>
-              </View>
-              <IconSymbol name="chevron.right" size={16} color="#C7C7CC" />
+          <View key={option.id} style={styles.settingsContainer}>
+            <View style={styles.settingOptionContainer}>
+              <ThemedText style={styles.settingTitle}>
+                {option.title}
+              </ThemedText>
+              {option.options.map((setting, index) => (
+                <TouchableOpacity
+                  key={setting.id}
+                  style={[
+                    styles.settingOption,
+                    index === option.options.length - 1 &&
+                      styles.lastSettingOption,
+                  ]}
+                  onPress={() => handleOptionPress(setting.route)}
+                >
+                  <View style={styles.settingContent}>
+                    <View style={styles.settingLeft}>
+                      <View style={styles.iconContainer}>
+                        <ThemedText style={styles.settingEmoji}>
+                          {setting.emoji}
+                        </ThemedText>
+                      </View>
+                      <View style={styles.settingTextContainer}>
+                        <ThemedText style={styles.settingTitle}>
+                          {setting.title}
+                        </ThemedText>
+                        <ThemedText style={styles.settingSubtitle}>
+                          {setting.subtitle}
+                        </ThemedText>
+                      </View>
+                    </View>
+                    <IconSymbol
+                      name="chevron.right"
+                      size={16}
+                      color="#C7C7CC"
+                    />
+                  </View>
+                </TouchableOpacity>
+              ))}
             </View>
-          </TouchableOpacity>
+          </View>
         ))}
-      </View>
-      <View style={styles.footer}>
-        <ThemedText style={styles.footerText}>{t("credits")}</ThemedText>
-        <ThemedText style={styles.footerText}>
-          {t("version")} {Constants.expoConfig?.version}
-        </ThemedText>
-      </View>
-      {/* </ScrollView> */}
+        <View style={styles.footer}>
+          <ThemedText style={styles.footerText}>{t("credits")}</ThemedText>
+          <ThemedText style={styles.footerText}>
+            {t("version")} {Constants.expoConfig?.version}
+          </ThemedText>
+        </View>
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -126,7 +170,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   settingsContainer: {
-    backgroundColor: "#fff",
+    marginBottom: 16,
+    backgroundColor: Colors.light.backgroundTint,
     marginHorizontal: 16,
     borderRadius: 12,
     overflow: "hidden",
@@ -139,9 +184,15 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  settingOptionContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#E0E0E0",
+  },
   settingOption: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 0.5,
     borderBottomColor: "#E0E0E0",
   },
@@ -152,6 +203,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  settingTitle: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#11181C",
+    marginBottom: 2,
   },
   settingLeft: {
     flexDirection: "row",
@@ -172,12 +229,6 @@ const styles = StyleSheet.create({
   },
   settingTextContainer: {
     flex: 1,
-  },
-  settingTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#11181C",
-    marginBottom: 2,
   },
   settingSubtitle: {
     fontSize: 14,
