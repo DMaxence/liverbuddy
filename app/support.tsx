@@ -182,12 +182,12 @@ export default function SupportScreen() {
               <ThemedText style={styles.sectionTitle}>
                 {t("sources")}
               </ThemedText>
+              <IconSymbol
+                name={sourcesExpanded ? "chevron.up" : "chevron.down"}
+                size={20}
+                color="#666"
+              />
             </View>
-            <IconSymbol
-              name={sourcesExpanded ? "chevron.up" : "chevron.down"}
-              size={20}
-              color="#666"
-            />
           </TouchableOpacity>
 
           {sourcesExpanded && (

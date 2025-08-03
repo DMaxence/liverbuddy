@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   settingGroup: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.backgroundTint,
     marginHorizontal: 16,
     borderRadius: 12,
     overflow: "hidden",
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     color: "#11181C",
   },
   selectedPillText: {
-    color: "#fff",
+    // color: "#11181C",
     fontWeight: "600",
   },
   saveButton: {

@@ -377,19 +377,16 @@ export const generateRecommendations = (
 ): string[] => {
   const recommendations: string[] = [];
 
-  if (score.daily_score >= 8) {
-    recommendations.push("Great job! Your liver is happy today. 🎉");
-    recommendations.push("Keep up the responsible drinking pattern.");
-  } else if (score.daily_score >= 6) {
+  if (score.daily_score <= 6) {
     recommendations.push("Consider reducing your alcohol intake slightly.");
     recommendations.push("Try alternating alcoholic drinks with water.");
-  } else if (score.daily_score >= 4) {
+  } else if (score.daily_score <= 4) {
     recommendations.push(
       "Your liver needs some care. Consider a break from alcohol."
     );
     recommendations.push("Focus on hydration and nutrition today.");
     recommendations.push("Avoid drinking for the next 24-48 hours.");
-  } else {
+  } else if (score.daily_score <= 2) {
     recommendations.push("⚠️ High alcohol consumption detected.");
     recommendations.push("Take a break from alcohol for several days.");
     recommendations.push("Consider speaking with a healthcare provider.");
@@ -546,6 +543,8 @@ export const calculateLiverHealth = (
   };
 
   score.recommendations = generateRecommendations(score, userProfile);
+
+  console.log("-------------Simple liver health score:", score, daily_score);
 
   return score;
 };
@@ -943,7 +942,7 @@ export const calculateMedicalHealthScore = (
   let bacPenalty = 0;
   if (dayLogs.length > 0) {
     const peakBAC = calculatePeakBAC(dayLogs, userProfile);
-    
+
     if (peakBAC >= 0.15) {
       bacPenalty = 20; // Dangerous BAC level
     } else if (peakBAC >= 0.1) {
@@ -995,7 +994,11 @@ export const calculateSimpleLiverScore = (
     0
   );
 
-  console.log(`Simple calculation: ${drinks.length} drinks, ${totalAlcoholUnits.toFixed(2)} units`);
+  console.log(
+    `Simple calculation: ${drinks.length} drinks, ${totalAlcoholUnits.toFixed(
+      2
+    )} units`
+  );
 
   // Reference points:
   // 1 bottle wine (750ml at 12.5%) = ~7.4 units
@@ -1010,7 +1013,8 @@ export const calculateSimpleLiverScore = (
   let bingePenalty = 0;
   if (drinks.length >= 2) {
     const sortedDrinks = [...drinks].sort(
-      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
     const drinkingDurationHours =
       (new Date(sortedDrinks[sortedDrinks.length - 1].timestamp).getTime() -
@@ -1020,7 +1024,10 @@ export const calculateSimpleLiverScore = (
     // If drinks consumed very quickly, apply penalty
     if (drinkingDurationHours < 2 && totalAlcoholUnits >= moderateUnits) {
       bingePenalty = 15; // Reduce max capacity by 15%
-    } else if (drinkingDurationHours < 4 && totalAlcoholUnits >= moderateUnits * 1.5) {
+    } else if (
+      drinkingDurationHours < 4 &&
+      totalAlcoholUnits >= moderateUnits * 1.5
+    ) {
       bingePenalty = 10; // Reduce max capacity by 10%
     }
   }
@@ -1033,7 +1040,11 @@ export const calculateSimpleLiverScore = (
 
   // Ensure score stays within 0-100 range
   const finalScore = Math.max(0, Math.min(100, Math.round(score)));
-  console.log(`Simple calculation result: ${finalScore} (effectiveMaxUnits: ${effectiveMaxUnits.toFixed(2)})`);
+  console.log(
+    `Simple calculation result: ${finalScore} (effectiveMaxUnits: ${effectiveMaxUnits.toFixed(
+      2
+    )})`
+  );
   return finalScore;
 };
 
@@ -1058,11 +1069,12 @@ export const calculateSimpleGlobalScore = (
   if (dayLogs.length === 0) return 10; // Return 10 on 0-10 scale
 
   const recentDays = dayLogs.slice(-7); // Last 7 days
-  const dailyScores = recentDays.map(day => 
-    calculateSimpleDailyScore(day.drinks, userProfile) // Use the 0-10 scale function
+  const dailyScores = recentDays.map(
+    (day) => calculateSimpleDailyScore(day.drinks, userProfile) // Use the 0-10 scale function
   );
 
-  const averageScore = dailyScores.reduce((sum, score) => sum + score, 0) / dailyScores.length;
+  const averageScore =
+    dailyScores.reduce((sum, score) => sum + score, 0) / dailyScores.length;
   return Math.round(averageScore * 10) / 10; // Round to 1 decimal place
 };
 
@@ -1084,17 +1096,17 @@ export const calculateSimpleLiverHealth = (
   // Simple calculations
   const daily_score = calculateSimpleDailyScore(todayDrinks, userProfile);
   const global_score = calculateSimpleGlobalScore(dayLogs, userProfile);
-  
+
   // Basic values for other required fields
   const totalAlcoholGrams = todayDrinks.reduce(
     (sum, drink) => sum + calculateAlcoholGrams(drink),
     0
   );
-  
+
   const bac_peak = calculatePeakBAC(todayDrinks, userProfile); // Keep accurate BAC
   const metabolism_time_hours = totalAlcoholGrams / 10; // Simple: 10g per hour
   const recovery_days_needed = Math.ceil(totalAlcoholGrams / 20); // Simple: 1 day per 20g
-  
+
   // Simple risk level based on daily score (on 0-10 scale)
   let risk_level: "low" | "moderate" | "high" | "critical";
   if (daily_score >= 8) risk_level = "low";
@@ -1113,14 +1125,16 @@ export const calculateSimpleLiverHealth = (
   };
 
   // Simple recommendations (on 0-10 scale)
-  if (daily_score >= 8) {
-    score.recommendations = ["Great job! Keep it up! 🎉"];
-  } else if (daily_score >= 6) {
-    score.recommendations = ["Moderate drinking detected. Consider slowing down."];
-  } else if (daily_score >= 3) {
+  if (daily_score <= 7) {
+    score.recommendations = [
+      "Moderate drinking detected. Consider slowing down.",
+    ];
+  } else if (daily_score <= 3) {
     score.recommendations = ["Heavy drinking. Take a break and hydrate."];
-  } else {
-    score.recommendations = ["⚠️ Excessive drinking. Stop and seek help if needed."];
+  } else if (daily_score <= 1) {
+    score.recommendations = [
+      "⚠️ Excessive drinking. Stop and seek help if needed.",
+    ];
   }
 
   return score;

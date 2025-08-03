@@ -127,11 +127,9 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <ThemedView style={styles.header}>
-          <View style={styles.headerLeft}>
-            <ThemedText style={styles.appTitle}>{t("appTitle")}</ThemedText>
-            <ThemedText style={styles.greeting}>{greeting}</ThemedText>
-            <ThemedText style={styles.date}>{currentDate}</ThemedText>
-          </View>
+          <ThemedText style={styles.appTitle}>{t("appTitle")}</ThemedText>
+          {/* <View style={styles.headerLeft}>
+          </View> */}
           {/* <TouchableOpacity
             style={styles.settingsButton}
             onPress={handleSettingsPress}
@@ -190,6 +188,25 @@ export default function HomeScreen() {
             </ThemedText>
           </View>
         </ThemedView>
+
+        {/* Recommendations Section */}
+        {userData?.recommendations && userData.recommendations.length > 0 && (
+          <ThemedView style={styles.recommendationsSection}>
+            <ThemedText style={styles.recommendationsTitle}>
+              {t("recommendations")}
+            </ThemedText>
+            {userData.recommendations.map((recommendation, index) => (
+              <View key={index} style={styles.recommendationItem}>
+                {userData.recommendations.length > 1 && (
+                  <ThemedText style={styles.recommendationBullet}>•</ThemedText>
+                )}
+                <ThemedText style={styles.recommendationText}>
+                  {recommendation}
+                </ThemedText>
+              </View>
+            ))}
+          </ThemedView>
+        )}
 
         {/* Add button */}
         <TouchableOpacity
@@ -294,11 +311,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    // flexDirection: "row",
+    // justifyContent: "space-between",
+    // alignItems: "flex-start",
     marginTop: 60,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   headerLeft: {
     flex: 1,
@@ -309,6 +326,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#11181C",
     marginBottom: 4,
+    textAlign: "center",
   },
   greeting: {
     fontSize: 18,
@@ -393,7 +411,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderTopWidth: 1,
     borderTopColor: "#E0E0E0",
-    marginBottom: 20,
+    marginBottom: 10,
   },
   statItem: {
     flex: 1,
@@ -414,6 +432,45 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     fontWeight: "bold",
     color: "#11181C",
+  },
+  recommendationsSection: {
+    backgroundColor: "#F8F9FA",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: "#4CAF50",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  recommendationsTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#11181C",
+    marginBottom: 16,
+  },
+  recommendationItem: {
+    paddingVertical: 8,
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  recommendationBullet: {
+    fontSize: 16,
+    color: "#4CAF50",
+    marginRight: 8,
+    marginTop: 2,
+  },
+  recommendationText: {
+    fontSize: 14,
+    color: "#333",
+    lineHeight: 20,
+    flex: 1,
   },
   logsSection: {
     borderTopWidth: 1,

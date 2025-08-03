@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   settingGroup: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light.backgroundTint,
     marginHorizontal: 16,
     borderRadius: 12,
     overflow: "hidden",

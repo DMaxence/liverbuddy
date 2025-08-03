@@ -5,6 +5,7 @@ import { useLanguage, useAccurate } from "@/stores/uiStore";
 import { DrinkOptionKey, DrinkTypeKey, PreferredUnit, UserProfile } from "@/types";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { getTranslation } from "@/constants/localization";
 
 export interface UserData {
   id: string;
@@ -21,6 +22,7 @@ export interface UserData {
   favorite_drink_option: DrinkOptionKey;
   favorite_drink?: string;
   preferred_unit: PreferredUnit;
+  recommendations: string[];
 }
 
 export const useUser = (userId: string = "local-user") => {
@@ -205,6 +207,42 @@ export const useUser = (userId: string = "local-user") => {
       healthScore = Math.round(weightedSum / totalWeight);
     }
 
+    // Calculate recommendations for today
+    let recommendations: string[] = [];
+    const now = new Date();
+    const todayString = `${now.getFullYear()}-${String(
+      now.getMonth() + 1
+    ).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    
+    if (accurateCalculations) {
+      // For accurate calculations, use the medical health score approach
+      const todayScore = dailyHealthScores[todayString] || 100;
+      if (todayScore >= 80) {
+        recommendations = [getTranslation("recommendationsGreatJob", language), getTranslation("recommendationsKeepUp", language)];
+      } else if (todayScore <= 60) {
+        recommendations = [getTranslation("recommendationsReduceAlcohol", language), getTranslation("recommendationsAlternateWater", language)];
+      } else if (todayScore <= 40) {
+        recommendations = [getTranslation("recommendationsLiverCare", language), getTranslation("recommendationsHydrationNutrition", language)];
+      } else if (todayScore <= 20) {
+        recommendations = [getTranslation("recommendationsHighAlcoholDetected", language), getTranslation("recommendationsTakeBreak", language), getTranslation("recommendationsSpeakDoctor", language)];
+      }
+    } else {
+      // For simple calculations, use the liver health calculation but override recommendations with localized ones
+      const liverHealth = calculateLiverHealth(dayLogs, defaultUserProfile, now, false);
+      
+      // Override with localized recommendations based on daily score (0-10 scale)
+      const dailyScore = liverHealth.daily_score;
+      if (dailyScore >= 8) {
+        recommendations = [getTranslation("recommendationsGreatJob", language), getTranslation("recommendationsKeepUp", language)];
+      } else if (dailyScore <= 7) {
+        recommendations = [getTranslation("recommendationsModerateDrinking", language)];
+      } else if (dailyScore <= 3) {
+        recommendations = [getTranslation("recommendationsHeavyDrinking", language)];
+      } else if (dailyScore <= 1) {
+        recommendations = [getTranslation("recommendationsExcessiveDrinking", language)];
+      }
+    }
+
     return {
       id: userId,
       name: "User",
@@ -220,6 +258,7 @@ export const useUser = (userId: string = "local-user") => {
       favorite_drink_option: userPrefs.favorite_drink_option,
       favorite_drink: userPrefs.favorite_drink,
       preferred_unit: userPrefs.preferred_unit,
+      recommendations,
     };
   };
 
