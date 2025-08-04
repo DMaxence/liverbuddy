@@ -8,14 +8,16 @@
 //   timestamp: Date;
 // }
 
-import { UserProfile, DrinkTypeKey } from "@/types";
-import type { DrinkLog } from "@/lib/database/schema";
 import { drinkTypeDefinitions } from "@/constants/drinks";
+import type { DrinkLog } from "@/lib/database/schema";
+import { DrinkTypeKey, UserProfile } from "@/types";
 
 export interface DayLog {
   date: Date;
   drinks: DrinkLog[];
 }
+
+type RiskLevel = "low" | "moderate" | "high" | "critical" | "destroyed";
 
 export interface LiverHealthScore {
   daily_score: number; // 0-10 (10 = excellent, 0 = critical)
@@ -23,7 +25,7 @@ export interface LiverHealthScore {
   bac_peak: number; // Peak blood alcohol concentration
   metabolism_time_hours: number; // Time to process all alcohol
   recovery_days_needed: number; // Days needed for liver recovery
-  risk_level: "low" | "moderate" | "high" | "critical";
+  risk_level: RiskLevel;
   recommendations: string[];
 }
 
@@ -173,7 +175,7 @@ export const calculateMetabolismTime = (
 // =============================================================================
 
 /**
- * Calculate daily liver health score (0-10)
+ * Calculate daily liver health score (can go negative for severe drinking)
  * Based on alcohol consumption, BAC levels, and recovery time
  */
 export const calculateDailyScore = (
@@ -193,24 +195,45 @@ export const calculateDailyScore = (
     userProfile
   );
 
-  // Score components (0-10 each)
   let score = 10;
 
-  // Penalize based on total alcohol consumed
+  // Enhanced penalties based on total alcohol consumed
   const dailyLimit = userProfile.gender === "male" ? 20 : 14; // grams
   const alcoholRatio = totalAlcoholGrams / dailyLimit;
-  score -= Math.min(4, alcoholRatio * 2); // Up to 4 points deduction
 
-  // Penalize based on peak BAC
-  if (peakBAC > 0.08) score -= 3; // Legal limit exceeded
+  if (alcoholRatio > 6)
+    score -= 12; // Extremely dangerous levels (>120g male, >84g female)
+  else if (alcoholRatio > 4)
+    score -= 8; // Very high consumption (>80g male, >56g female)
+  else if (alcoholRatio > 3)
+    score -= 6; // High consumption (>60g male, >42g female)
+  else if (alcoholRatio > 2) score -= 4; // Moderate-high consumption
+  else if (alcoholRatio > 1) score -= 2; // Above recommended limit
+  else score -= alcoholRatio * 2; // Proportional penalty up to limit
+
+  // Enhanced penalties based on peak BAC
+  if (peakBAC > 0.2) score -= 6; // Life-threatening BAC
+  else if (peakBAC > 0.15) score -= 5; // Severely intoxicated
+  else if (peakBAC > 0.12) score -= 4; // Very intoxicated
+  else if (peakBAC > 0.08) score -= 3; // Legal limit exceeded
   else if (peakBAC > 0.05) score -= 2; // Moderate impairment
   else if (peakBAC > 0.02) score -= 1; // Mild impairment
 
-  // Penalize based on metabolism time
-  if (metabolismTime > 8) score -= 2; // Long processing time
+  // Enhanced penalties based on metabolism time
+  if (metabolismTime > 16) score -= 4; // More than 16 hours to process
+  else if (metabolismTime > 12) score -= 3; // More than 12 hours
+  else if (metabolismTime > 8) score -= 2; // Long processing time
   else if (metabolismTime > 4) score -= 1;
 
-  return Math.max(0, Math.round(score * 10) / 10);
+  // Additional penalty for binge drinking in a single day
+  const bingeLimit = userProfile.gender === "male" ? 60 : 48; // grams
+  if (totalAlcoholGrams > bingeLimit * 2) score -= 4; // Double binge threshold
+  else if (totalAlcoholGrams > bingeLimit) score -= 2; // Binge threshold
+
+  // Allow negative scores to reflect severe health impact
+  const finalScore = Math.round(score * 10) / 10;
+
+  return finalScore;
 };
 
 /**
@@ -259,8 +282,59 @@ export const calculatePeakBAC = (
 };
 
 /**
+ * Calculate recent recovery bonus based on current patterns (last 30 days)
+ * Prioritizes recent sobriety over historical streaks
+ */
+export const calculateRecentRecoveryBonus = (recentDays: DayLog[]): number => {
+  if (recentDays.length === 0) return 0;
+
+  // Check for current alcohol-free streak (from most recent day backwards)
+  let currentSoberDays = 0;
+  const sortedDays = [...recentDays].sort(
+    (a, b) => b.date.getTime() - a.date.getTime()
+  );
+
+  for (const day of sortedDays) {
+    if (day.drinks.length === 0) {
+      currentSoberDays++;
+    } else {
+      break; // Stop at first drinking day
+    }
+  }
+
+  // Count total alcohol-free days in recent period
+  const totalSoberDaysRecent = recentDays.filter(
+    (day) => day.drinks.length === 0
+  ).length;
+  const soberRatio = totalSoberDaysRecent / recentDays.length;
+
+  // Check recent drinking activity (last 7 days) to reduce bonuses if actively drinking
+  const lastWeek = recentDays.slice(-7);
+  const recentDrinkingDays = lastWeek.filter(
+    (day) => day.drinks.length > 0
+  ).length;
+  const recentDrinkingPenalty = recentDrinkingDays > 2 ? 0.5 : 0; // Reduce bonus if drinking 3+ days in last week
+
+  let bonus = 0;
+  // Bonus for current sober streak (immediate sobriety)
+  if (currentSoberDays >= 14) bonus += 1.5; // 2+ weeks currently sober
+  else if (currentSoberDays >= 7) bonus += 1; // 1+ week currently sober
+  else if (currentSoberDays >= 3) bonus += 0.5; // Few days currently sober
+
+  // Bonus for overall sobriety ratio in recent period
+  if (soberRatio >= 0.9) bonus += 1; // 90%+ alcohol-free days
+  else if (soberRatio >= 0.8) bonus += 0.5; // 80%+ alcohol-free days
+  else if (soberRatio >= 0.7) bonus += 0.3; // 70%+ alcohol-free days
+
+  // Apply recent drinking penalty
+  bonus -= recentDrinkingPenalty;
+
+  return Math.max(0, bonus); // Don't let recovery bonus go negative
+};
+
+/**
  * Calculate global liver health score based on long-term patterns
- * Considers frequency, quantity, and recovery periods
+ * Considers daily scores, frequency, quantity, and recovery periods
  */
 export const calculateGlobalScore = (
   dayLogs: DayLog[],
@@ -268,10 +342,19 @@ export const calculateGlobalScore = (
 ): number => {
   if (dayLogs.length === 0) return 10;
 
-  let score = 10;
   const recentDays = dayLogs.slice(-30); // Last 30 days
 
-  // Calculate average daily consumption
+  // Calculate daily scores for recent days and use as base
+  const dailyScores = recentDays.map((day) =>
+    calculateDailyScore(day.drinks, userProfile)
+  );
+  const avgDailyScore =
+    dailyScores.reduce((sum, score) => sum + score, 0) / dailyScores.length;
+
+  // Start with average daily score instead of fixed 10
+  let score = avgDailyScore;
+
+  // Additional penalties for poor patterns that daily scores might miss
   const totalAlcoholGrams = recentDays.reduce(
     (sum, day) =>
       sum +
@@ -285,24 +368,26 @@ export const calculateGlobalScore = (
   const avgDailyAlcohol = totalAlcoholGrams / recentDays.length;
   const weeklyAlcohol = avgDailyAlcohol * 7;
 
-  // WHO guidelines: <100g/week low risk, 100-280g moderate, >280g high risk
-  if (weeklyAlcohol > 280) score -= 5; // High risk
+  // Enhanced WHO guidelines penalties - more severe for high consumption
+  if (weeklyAlcohol > 420) score -= 8; // Extremely high risk (>60g/day)
+  else if (weeklyAlcohol > 280) score -= 5; // High risk
+  else if (weeklyAlcohol > 140) score -= 3; // Moderate-high risk
   else if (weeklyAlcohol > 100) score -= 2; // Moderate risk
 
   // Count drinking days and alcohol-free days
   const drinkingDays = recentDays.filter((day) => day.drinks.length > 0).length;
   const drinkingFrequency = drinkingDays / recentDays.length;
 
-  // Penalize frequent drinking (>5 days/week)
-  if (drinkingFrequency > 0.71) score -= 2; // >5 days/week
+  // Enhanced frequency penalties
+  if (drinkingFrequency > 0.85) score -= 4; // Daily drinking
+  else if (drinkingFrequency > 0.71) score -= 2; // >5 days/week
   else if (drinkingFrequency > 0.43) score -= 1; // >3 days/week
 
-  // Reward alcohol-free periods
-  const longestSoberStreak = calculateLongestSoberStreak(dayLogs);
-  if (longestSoberStreak >= 7) score += 1; // Week+ sober streak
-  if (longestSoberStreak >= 30) score += 1; // Month+ sober streak
+  // Calculate recent recovery pattern (more important than historical streaks)
+  const recentRecoveryBonus = calculateRecentRecoveryBonus(recentDays);
+  score += recentRecoveryBonus;
 
-  // Check for binge drinking patterns
+  // Enhanced binge drinking penalties
   const bingeDays = recentDays.filter((day) => {
     const dayTotal = day.drinks.reduce(
       (sum, drink) => sum + calculateAlcoholGrams(drink),
@@ -312,11 +397,31 @@ export const calculateGlobalScore = (
     return dayTotal > bingeLimit;
   }).length;
 
-  if (bingeDays > 4) score -= 3; // Frequent binge drinking
+  if (bingeDays > 8) score -= 6; // Very frequent binge drinking
+  else if (bingeDays > 4) score -= 4; // Frequent binge drinking
+  else if (bingeDays > 2) score -= 2; // Regular binge drinking
   else if (bingeDays > 0) score -= 1; // Occasional binge drinking
 
-  const finalScore = Math.min(10, Math.round(score * 10) / 10);
-  console.log(`Global score calculation: base=${score}, final=${finalScore}, can be negative: ${finalScore < 0}`);
+  // Penalty for consistently poor daily scores
+  const poorDayScores = dailyScores.filter((score) => score < 4).length;
+  if (poorDayScores > 15) score -= 4; // More than half the days are poor
+  else if (poorDayScores > 10) score -= 2; // Many poor days
+  else if (poorDayScores > 5) score -= 1; // Some poor days
+
+  // Penalty for very low daily scores (severe drinking days)
+  const severeDayScores = dailyScores.filter((score) => score < 2).length;
+  if (severeDayScores > 5) score -= 3; // Multiple severe drinking days
+  else if (severeDayScores > 2) score -= 2; // Several severe drinking days
+  else if (severeDayScores > 0) score -= 1; // Some severe drinking days
+
+  // Allow negative scores but cap positive scores at 10 to maintain 0-10 scale
+  // const finalScore = Math.round(Math.min(10, score) * 10) / 10;
+  const finalScore = Math.min(10, score);
+  console.log(
+    `Global score calculation: base=${score}, final=${finalScore}, can be negative: ${
+      finalScore < 0
+    }`
+  );
   return finalScore;
 };
 
@@ -358,14 +463,14 @@ export const determineRiskLevel = (
   alcoholGrams: number,
   peakBAC: number,
   userProfile: UserProfile
-): "low" | "moderate" | "high" | "critical" => {
-  // Critical level indicators
+): RiskLevel => {
+  // New: Liver destruction threshold
+  if (peakBAC > 0.4 || alcoholGrams > 300) return "destroyed"; // Lethal zone
+
   if (peakBAC > 0.25 || alcoholGrams > 150) return "critical";
 
-  // High risk indicators
   if (peakBAC > 0.15 || alcoholGrams > 80) return "high";
 
-  // Moderate risk indicators
   const moderateLimit = userProfile.gender === "male" ? 40 : 30;
   if (peakBAC > 0.08 || alcoholGrams > moderateLimit) return "moderate";
 
@@ -966,14 +1071,23 @@ export const calculateMedicalHealthScore = (
   }
   score -= consecutivePenalty;
 
-  // 4. Bonus for responsible drinking patterns
+  // 4. Extreme consumption penalty (scales with amount)
+  let extremePenalty = 0;
+  if (units > 20) {
+    // For every 10 units over 20, apply additional penalty
+    const excessUnits = units - 20;
+    extremePenalty = Math.floor(excessUnits / 10) * 20; // 20 points per 10 units over 20
+  }
+  score -= extremePenalty;
+
+  // 5. Bonus for responsible drinking patterns
   let bonus = 0;
   if (units <= 2 && dayLogs.length <= 2) {
     bonus = 5; // Moderate, spaced drinking
   }
   score += bonus;
 
-  return Math.max(0, Math.min(100, Math.round(score)));
+  return Math.min(100, Math.round(score));
 };
 
 // =============================================================================
@@ -1080,7 +1194,11 @@ export const calculateSimpleGlobalScore = (
   const averageScore =
     dailyScores.reduce((sum, score) => sum + score, 0) / dailyScores.length;
   const finalScore = Math.round(averageScore * 10) / 10; // Round to 1 decimal place, can be negative
-  console.log(`Simple global score: average=${averageScore}, final=${finalScore}, can be negative: ${finalScore < 0}`);
+  console.log(
+    `Simple global score: average=${averageScore}, final=${finalScore}, can be negative: ${
+      finalScore < 0
+    }`
+  );
   return finalScore;
 };
 

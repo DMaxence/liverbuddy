@@ -29,9 +29,11 @@ import {
   TouchableOpacity,
   View,
   Modal,
+  Dimensions,
 } from "react-native";
 import { getLocalizedLiverState } from "@/types";
 
+const shadow = require("@/assets/images/shadow.png");
 // Import all liver images statically
 const liverImages = {
   1: require("@/assets/images/liver-level-1.png"),
@@ -624,10 +626,11 @@ export default function CalendarScreen() {
         onRequestClose={() => setIsLiverDetailModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeaderBar} />
+          <View style={styles.miniModalContent}>
             <View style={styles.modalHeader}>
-              <ThemedText style={styles.modalTitle}>Liver Health</ThemedText>
+              <ThemedText style={styles.modalTitle}>
+                {t("liverHealth")}
+              </ThemedText>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setIsLiverDetailModalVisible(false)}
@@ -638,6 +641,7 @@ export default function CalendarScreen() {
             <View style={styles.modalBody}>
               {selectedDay && (
                 <View style={styles.liverDetailContainer}>
+                  <Image source={shadow} style={styles.shadow} />
                   <Image
                     source={
                       liverImages[
@@ -763,8 +767,8 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   liverImage: {
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
   },
   drinkIcon: {
     fontSize: 20,
@@ -822,20 +826,16 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 200,
   },
-  modalHeaderBar: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 2,
-    alignSelf: "center",
-    marginBottom: 20,
+  miniModalContent: {
+    width: Dimensions.get("window").width - 40,
+    backgroundColor: Colors.light.background,
+    borderRadius: 20,
+    padding: 20,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 20,
-    marginBottom: 20,
   },
   modalTitle: {
     fontSize: 18,
@@ -852,10 +852,10 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   modalBody: {
-    maxHeight: 300,
+    // maxHeight: 250,
     alignItems: "center",
     justifyContent: "center",
-    flex: 1,
+    // flex: 1,
   },
   emptyStateContainer: {
     paddingVertical: 40,
@@ -950,9 +950,15 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   liverDetailImage: {
-    width: 120,
-    height: 120,
-    marginBottom: 16,
+    width: 180,
+    height: 180,
+    marginBottom: 20,
+  },
+  shadow: {
+    width: 180,
+    height: 180,
+    top: 20,
+    position: "absolute",
   },
   liverDetailScoreText: {
     fontSize: 24,

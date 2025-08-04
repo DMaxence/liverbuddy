@@ -130,6 +130,7 @@ export const translations = {
     noDrinksLogged: "No drinks logged for this day! 🧠",
     liverRecovering: "Your liver is still recovering from recent drinking 🫁",
     loadingCalendar: "Loading calendar...",
+    liverHealth: "Liver Health",
 
     // Stats
     totalDrinksLabel: "Total drinks",
@@ -489,6 +490,7 @@ export const translations = {
     noDrinksLogged: "Aucune boisson enregistrée pour ce jour ! 🧠",
     liverRecovering: "Votre foie se remet encore de la consommation récente 🫁",
     loadingCalendar: "Chargement du calendrier...",
+    liverHealth: "Santé Hépatique",
 
     // Stats
     totalDrinksLabel: "Total des boissons",

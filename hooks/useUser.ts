@@ -147,9 +147,11 @@ export const useUser = (userId: string = "local-user") => {
         );
         score = liverHealth.daily_score * 10; // Convert 0-10 scale to 0-100 for display
       }
-      
+
       if (drinksByDate[dateString]?.length > 0) {
-        console.log(`Daily score for ${dateString}: ${score}, drinks: ${drinksByDate[dateString].length}`);
+        console.log(
+          `Daily score for ${dateString}: ${score}, drinks: ${drinksByDate[dateString].length}`
+        );
       }
 
       dailyHealthScores[dateString] = score;
@@ -199,18 +201,15 @@ export const useUser = (userId: string = "local-user") => {
 
     // Calculate overall health score using global score from calculateLiverHealth
     let healthScore: number;
-    
+
     const liverHealth = calculateLiverHealth(
       dayLogs,
       defaultUserProfile,
       new Date(),
       accurateCalculations // Pass the accurateCalculations flag directly
     );
-    
+
     healthScore = Math.round(liverHealth.global_score * 10); // Convert 0-10 scale to 0-100 for display
-    console.log(`Global health score: ${liverHealth.global_score} (0-10 scale) -> ${healthScore} (0-100 scale), mode: ${accurateCalculations ? 'Accurate' : 'Simple'}`);
-    console.log(`Day logs count: ${dayLogs.length}, total drinks: ${dayLogs.reduce((sum, day) => sum + day.drinks.length, 0)}`);
-    console.log(`Recent drinks:`, dayLogs.slice(0, 3).map(day => ({ date: day.date.toDateString(), drinks: day.drinks.length })));
 
     // Calculate recommendations for today
     let recommendations: string[] = [];
@@ -221,7 +220,7 @@ export const useUser = (userId: string = "local-user") => {
 
     if (accurateCalculations) {
       // For accurate calculations, use the medical health score approach
-      const todayScore = dailyHealthScores[todayString] || 100;
+      const todayScore = dailyHealthScores[todayString] ?? 100;
       if (todayScore <= 60) {
         recommendations = [
           getTranslation("recommendationsReduceAlcohol", language),
