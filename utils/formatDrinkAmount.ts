@@ -2,39 +2,33 @@ import { PreferredUnit } from "@/types";
 
 // Unit conversion constants
 const UNIT_CONVERSIONS = {
-  ml: { to_ml: 1, to_oz: 0.033814, to_cl: 0.1 },
-  oz: { to_ml: 29.5735, to_oz: 1, to_cl: 2.95735 },
-  cl: { to_ml: 10, to_oz: 0.33814, to_cl: 1 },
-  l: { to_ml: 1000, to_oz: 33.814, to_cl: 100 },
+  oz: { to_oz: 1, to_cl: 2.95735 },
+  cl: { to_oz: 0.33814, to_cl: 1 },
+  l: { to_oz: 33.814, to_cl: 100 },
 } as const;
 
 /**
- * Format drink amount from mL to user's preferred unit
- * @param amountMl - Amount in milliliters (storage unit)
+ * Format drink amount from cl to user's preferred unit
+ * @param amountCl - Amount in centiliters (storage unit)
  * @param preferredUnit - User's preferred display unit
  * @returns Formatted string with amount and unit
  */
 export const formatDrinkAmount = (
-  amountMl: number,
-  preferredUnit: PreferredUnit = "ml"
+  amountCl: number,
+  preferredUnit: PreferredUnit = "cl"
 ): string => {
-  if (amountMl <= 0) return "0";
+  if (amountCl <= 0) return "0";
 
   let displayAmount: number;
   let displayUnit: string;
 
   switch (preferredUnit) {
     case "oz":
-      displayAmount = amountMl * UNIT_CONVERSIONS.ml.to_oz;
+      displayAmount = amountCl * UNIT_CONVERSIONS.cl.to_oz;
       displayUnit = "oz";
       break;
-    case "ml":
-      // For display purposes, convert to cl since we don't want to show ml
-      displayAmount = amountMl * UNIT_CONVERSIONS.ml.to_cl;
-      displayUnit = "cl";
-      break;
     default:
-      displayAmount = amountMl * UNIT_CONVERSIONS.ml.to_cl;
+      displayAmount = amountCl;
       displayUnit = "cl";
   }
 
@@ -50,29 +44,26 @@ export const formatDrinkAmount = (
     return `${Math.round(displayAmount)} ${displayUnit}`;
   } else {
     // For larger amounts, round to whole number
-    const liters = amountMl / 1000;
+    const liters = amountCl / 100;
     // Only show decimal if there is one, otherwise show plain number
     return `${liters % 1 === 0 ? Math.round(liters) : liters.toFixed(1)} L`;
   }
 };
 
 /**
- * Convert amount from mL to preferred unit (without formatting)
- * @param amountMl - Amount in milliliters
+ * Convert amount from cl to preferred unit (without formatting)
+ * @param amountCl - Amount in centiliters
  * @param preferredUnit - Target unit
  * @returns Amount in target unit
  */
-export const convertFromMl = (
-  amountMl: number,
+export const convertFromCl = (
+  amountCl: number,
   preferredUnit: PreferredUnit = "oz"
 ): number => {
   switch (preferredUnit) {
     case "oz":
-      return amountMl * UNIT_CONVERSIONS.ml.to_oz;
-    case "ml":
-      // For display purposes, convert to cl since we don't want to show ml
-      return amountMl * UNIT_CONVERSIONS.ml.to_cl;
+      return amountCl * UNIT_CONVERSIONS.cl.to_oz;
     default:
-      return amountMl * UNIT_CONVERSIONS.ml.to_oz;
+      return amountCl;
   }
 };

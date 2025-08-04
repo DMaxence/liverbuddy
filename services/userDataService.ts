@@ -31,7 +31,7 @@ export const getUserData = async (userId: string): Promise<UserData> => {
       favorite_drink_type: "beer" as DrinkTypeKey,
       favorite_drink_option: "can" as DrinkOptionKey,
       favorite_drink: undefined,
-      preferred_unit: "ml",
+      preferred_unit: "cl",
       weekly_goal: 7,
     };
 
@@ -42,7 +42,9 @@ export const getUserData = async (userId: string): Promise<UserData> => {
     const drinksByDate: { [date: string]: DrinkLog[] } = {};
     allLogs.forEach((log) => {
       const date = new Date(log.timestamp);
-      const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      const dateString = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
       if (!drinksByDate[dateString]) {
         drinksByDate[dateString] = [];
       }
@@ -83,7 +85,9 @@ export const getUserData = async (userId: string): Promise<UserData> => {
       allLogs.length > 0
         ? (() => {
             const date = new Date(allLogs[0].timestamp);
-            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+            return `${date.getFullYear()}-${String(
+              date.getMonth() + 1
+            ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
           })()
         : null;
 

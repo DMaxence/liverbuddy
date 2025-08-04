@@ -15,20 +15,20 @@ export interface CreateDrinkLogData {
   drink_type: DrinkTypeKey;
   drink_option: DrinkOptionKey;
   drink_name?: string; // Optional specific drink name
-  amount_ml: number; // Always in mL
+  amount_cl: number; // Always in cl
   timestamp?: string;
   is_approximate?: boolean;
   alcohol_percentage?: number;
 }
 
 export interface DrinkLogWithCalculations extends DrinkLog {
-  amount_ml: number;
+  amount_cl: number;
   amount_oz: number;
   alcohol_units: number;
 }
 
 export interface DailyConsumption {
-  total_ml: number;
+  total_cl: number;
   total_oz: number;
   total_alcohol_units: number;
   drink_count: number;
@@ -36,7 +36,7 @@ export interface DailyConsumption {
 
 export interface WeeklyConsumption {
   date: string;
-  total_ml: number;
+  total_cl: number;
   total_oz: number;
   total_alcohol_units: number;
   drink_count: number;
@@ -62,7 +62,7 @@ export const createDrinkLog = async (
       drink_type: data.drink_type,
       drink_option: data.drink_option,
       drink_name: data.drink_name,
-      amount_ml: data.amount_ml,
+      amount_cl: data.amount_cl,
       timestamp: data.timestamp || new Date().toISOString(),
       is_approximate: data.is_approximate || false,
       alcohol_percentage: data.alcohol_percentage,
@@ -103,8 +103,8 @@ export const getDrinkLogs = async (
     // Add calculated fields
     return logs.map((log) => ({
       ...log,
-      amount_ml: log.amount_ml,
-      amount_oz: log.amount_ml * 0.033814,
+      amount_cl: log.amount_cl,
+      amount_oz: log.amount_cl * 0.33814,
       alcohol_units: calculateAlcoholUnits(log),
     }));
   } catch (error) {
@@ -136,7 +136,7 @@ export const getDrinkLogsForDate = async (
   }
 };
 
-// Get daily alcohol consumption
+// Get daily consumption summary
 export const getDailyConsumption = async (
   userId: string,
   date: string = new Date().toISOString().split("T")[0]
@@ -210,7 +210,7 @@ export const deleteDrinkLog = async (logId: string): Promise<void> => {
   }
 };
 
-// Get drink statistics for a user
+// Get drink statistics
 export const getDrinkStatistics = async (
   userId: string,
   days: number = 30
@@ -230,7 +230,7 @@ export const getDrinkStatistics = async (
   }
 };
 
-// Bulk create drink logs (for "last night" mode)
+// Create bulk drink logs (for testing or bulk import)
 export const createBulkDrinkLogs = async (
   userId: string,
   drinkCount: number,
@@ -238,19 +238,19 @@ export const createBulkDrinkLogs = async (
   isApproximate: boolean = true
 ): Promise<DrinkLog[]> => {
   try {
-    const bulkDrinkLogs = Array.from({ length: drinkCount }, (_, index) => ({
+    const bulkLogs = Array.from({ length: drinkCount }, (_, index) => ({
       id: Crypto.randomUUID(),
       user_id: userId,
       drink_type: "other" as DrinkTypeKey,
       drink_option: "standard" as DrinkOptionKey,
-      amount_ml: 200, // Default amount for bulk drinks
+      amount_cl: 20, // Default amount for bulk drinks
       timestamp,
       is_approximate: isApproximate,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }));
 
-    const result = await db.insert(drinkLogs).values(bulkDrinkLogs).returning();
+    const result = await db.insert(drinkLogs).values(bulkLogs).returning();
     return result;
   } catch (error) {
     console.error("Error in createBulkDrinkLogs:", error);

@@ -1,8 +1,17 @@
 import { db } from "@/lib/database";
-import { calculateMedicalHealthScore, calculateLiverHealth, DayLog } from "@/lib/database/calculations";
+import {
+  calculateMedicalHealthScore,
+  calculateLiverHealth,
+  DayLog,
+} from "@/lib/database/calculations";
 import { DrinkLog, drinkLogs, user } from "@/lib/database/schema";
 import { useLanguage, useAccurate } from "@/stores/uiStore";
-import { DrinkOptionKey, DrinkTypeKey, PreferredUnit, UserProfile } from "@/types";
+import {
+  DrinkOptionKey,
+  DrinkTypeKey,
+  PreferredUnit,
+  UserProfile,
+} from "@/types";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { getTranslation } from "@/constants/localization";
@@ -95,7 +104,7 @@ export const useUser = (userId: string = "local-user") => {
       weight_kg: 70,
       gender: "male",
       activity_level: "moderately_active",
-      drink_habits: "occasionally"
+      drink_habits: "occasionally",
     };
 
     // Prepare day logs for the calculation methods
@@ -107,10 +116,10 @@ export const useUser = (userId: string = "local-user") => {
       const dateString = `${checkDate.getFullYear()}-${String(
         checkDate.getMonth() + 1
       ).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
-      
+
       dayLogs.push({
         date: checkDate,
-        drinks: drinksByDate[dateString] || []
+        drinks: drinksByDate[dateString] || [],
       });
     }
 
@@ -124,23 +133,34 @@ export const useUser = (userId: string = "local-user") => {
       ).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
 
       let score: number;
-      
-      console.log(`Calculating for ${dateString}, accurateCalculations: ${accurateCalculations}`);
-      
+
       if (accurateCalculations) {
         // Use existing accurate calculation method (legacy medical health score)
         score = calculateMedicalHealthScore(allLogs, dateString);
       } else {
         // Use new simple calculation method
-        const liverHealth = calculateLiverHealth(dayLogs, defaultUserProfile, checkDate, false);
+        const liverHealth = calculateLiverHealth(
+          dayLogs,
+          defaultUserProfile,
+          checkDate,
+          false
+        );
         score = liverHealth.daily_score * 10; // Convert 0-10 scale to 0-100 for display
       }
       
+      if (drinksByDate[dateString]?.length > 0) {
+        console.log(`Daily score for ${dateString}: ${score}, drinks: ${drinksByDate[dateString].length}`);
+      }
+
       dailyHealthScores[dateString] = score;
 
       const drinkCount = drinksByDate[dateString]?.length || 0;
       if (drinkCount > 0) {
-        console.log(`Health score for ${dateString}: ${score} (${drinkCount} drinks) - Mode: ${accurateCalculations ? 'Accurate' : 'Simple'}`);
+        console.log(
+          `Health score for ${dateString}: ${score} (${drinkCount} drinks) - Mode: ${
+            accurateCalculations ? "Accurate" : "Simple"
+          }`
+        );
       }
     }
 
@@ -177,35 +197,20 @@ export const useUser = (userId: string = "local-user") => {
       }
     });
 
-    // Calculate overall health score (simplified and accurate)
-    const recentScores = Object.entries(dailyHealthScores)
-      .filter(([date]) => {
-        const scoreDate = new Date(date);
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        return scoreDate >= thirtyDaysAgo;
-      })
-      .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime()) // Most recent first
-      .map(([date, score], index) => ({ date, score, daysAgo: index }));
-
-    // Calculate weighted average with exponential decay for recent days
+    // Calculate overall health score using global score from calculateLiverHealth
     let healthScore: number;
-
-    if (recentScores.length === 0) {
-      healthScore = 100;
-    } else {
-      let weightedSum = 0;
-      let totalWeight = 0;
-
-      recentScores.forEach(({ score, daysAgo }) => {
-        // Exponential decay: recent days have much higher weight
-        const weight = Math.exp(-daysAgo * 0.1); // 0.1 is decay factor
-        weightedSum += score * weight;
-        totalWeight += weight;
-      });
-
-      healthScore = Math.round(weightedSum / totalWeight);
-    }
+    
+    const liverHealth = calculateLiverHealth(
+      dayLogs,
+      defaultUserProfile,
+      new Date(),
+      accurateCalculations // Pass the accurateCalculations flag directly
+    );
+    
+    healthScore = Math.round(liverHealth.global_score * 10); // Convert 0-10 scale to 0-100 for display
+    console.log(`Global health score: ${liverHealth.global_score} (0-10 scale) -> ${healthScore} (0-100 scale), mode: ${accurateCalculations ? 'Accurate' : 'Simple'}`);
+    console.log(`Day logs count: ${dayLogs.length}, total drinks: ${dayLogs.reduce((sum, day) => sum + day.drinks.length, 0)}`);
+    console.log(`Recent drinks:`, dayLogs.slice(0, 3).map(day => ({ date: day.date.toDateString(), drinks: day.drinks.length })));
 
     // Calculate recommendations for today
     let recommendations: string[] = [];
@@ -213,33 +218,50 @@ export const useUser = (userId: string = "local-user") => {
     const todayString = `${now.getFullYear()}-${String(
       now.getMonth() + 1
     ).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    
+
     if (accurateCalculations) {
       // For accurate calculations, use the medical health score approach
       const todayScore = dailyHealthScores[todayString] || 100;
-      if (todayScore >= 80) {
-        recommendations = [getTranslation("recommendationsGreatJob", language), getTranslation("recommendationsKeepUp", language)];
-      } else if (todayScore <= 60) {
-        recommendations = [getTranslation("recommendationsReduceAlcohol", language), getTranslation("recommendationsAlternateWater", language)];
+      if (todayScore <= 60) {
+        recommendations = [
+          getTranslation("recommendationsReduceAlcohol", language),
+          getTranslation("recommendationsAlternateWater", language),
+        ];
       } else if (todayScore <= 40) {
-        recommendations = [getTranslation("recommendationsLiverCare", language), getTranslation("recommendationsHydrationNutrition", language)];
+        recommendations = [
+          getTranslation("recommendationsLiverCare", language),
+          getTranslation("recommendationsHydrationNutrition", language),
+        ];
       } else if (todayScore <= 20) {
-        recommendations = [getTranslation("recommendationsHighAlcoholDetected", language), getTranslation("recommendationsTakeBreak", language), getTranslation("recommendationsSpeakDoctor", language)];
+        recommendations = [
+          getTranslation("recommendationsHighAlcoholDetected", language),
+          getTranslation("recommendationsTakeBreak", language),
+          getTranslation("recommendationsSpeakDoctor", language),
+        ];
       }
     } else {
       // For simple calculations, use the liver health calculation but override recommendations with localized ones
-      const liverHealth = calculateLiverHealth(dayLogs, defaultUserProfile, now, false);
-      
+      const liverHealth = calculateLiverHealth(
+        dayLogs,
+        defaultUserProfile,
+        now,
+        false
+      );
+
       // Override with localized recommendations based on daily score (0-10 scale)
       const dailyScore = liverHealth.daily_score;
-      if (dailyScore >= 8) {
-        recommendations = [getTranslation("recommendationsGreatJob", language), getTranslation("recommendationsKeepUp", language)];
-      } else if (dailyScore <= 7) {
-        recommendations = [getTranslation("recommendationsModerateDrinking", language)];
+      if (dailyScore <= 7) {
+        recommendations = [
+          getTranslation("recommendationsModerateDrinking", language),
+        ];
       } else if (dailyScore <= 3) {
-        recommendations = [getTranslation("recommendationsHeavyDrinking", language)];
+        recommendations = [
+          getTranslation("recommendationsHeavyDrinking", language),
+        ];
       } else if (dailyScore <= 1) {
-        recommendations = [getTranslation("recommendationsExcessiveDrinking", language)];
+        recommendations = [
+          getTranslation("recommendationsExcessiveDrinking", language),
+        ];
       }
     }
 

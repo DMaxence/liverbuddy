@@ -1,6 +1,7 @@
 import * as SQLite from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { drinkLogs, user } from "./schema";
+import { drinkOptions, drinkTypes } from "@/constants/drinks";
 
 // Open the database
 const sqlite = SQLite.openDatabaseSync("liverbuddy.db", {
@@ -18,10 +19,10 @@ export const initDatabase = async () => {
       CREATE TABLE IF NOT EXISTS drink_logs (
         id TEXT PRIMARY KEY NOT NULL,
         user_id TEXT NOT NULL,
-        drink_type TEXT NOT NULL CHECK (drink_type IN ('beer', 'wine', 'cocktail', 'spirits', 'other')),
-        drink_option TEXT NOT NULL,
+        drink_type TEXT NOT NULL CHECK (drink_type IN (${drinkTypes.map(t => `'${t}'`).join(', ')})),
+        drink_option TEXT NOT NULL CHECK (drink_option IN (${drinkOptions.map(o => `'${o}'`).join(', ')})),
         drink_name TEXT,
-        amount_ml REAL NOT NULL,
+        amount_cl REAL NOT NULL,
         timestamp TEXT NOT NULL,
         is_approximate INTEGER DEFAULT 0,
         alcohol_percentage REAL,
@@ -32,10 +33,10 @@ export const initDatabase = async () => {
       CREATE TABLE IF NOT EXISTS user (
         id TEXT PRIMARY KEY NOT NULL,
         user_id TEXT NOT NULL UNIQUE,
-        favorite_drink_type TEXT NOT NULL CHECK (favorite_drink_type IN ('beer', 'wine', 'cocktail', 'spirits', 'other')),
-        favorite_drink_option TEXT NOT NULL CHECK (favorite_drink_option IN ('can', 'bottle', 'pint', 'large', 'glass', 'large_glass', 'standard', 'strong', 'double', 'shot', 'tall', 'small', 'medium', 'extra_large')),
+        favorite_drink_type TEXT NOT NULL CHECK (favorite_drink_type IN (${drinkTypes.map(t => `'${t}'`).join(', ')})),
+        favorite_drink_option TEXT NOT NULL CHECK (favorite_drink_option IN (${drinkOptions.map(o => `'${o}'`).join(', ')})),
         favorite_drink TEXT,
-        preferred_unit TEXT DEFAULT 'ml' CHECK (preferred_unit IN ('ml', 'oz')),
+        preferred_unit TEXT DEFAULT 'cl' CHECK (preferred_unit IN ('cl', 'oz')),
         weekly_goal INTEGER DEFAULT 7,
         weight_unit TEXT DEFAULT 'kg' CHECK (weight_unit IN ('kg', 'lbs')),
         app_language TEXT DEFAULT 'en' CHECK (app_language IN ('en', 'fr')),

@@ -2,8 +2,8 @@ import React from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useTranslation } from "@/hooks/useTranslation";
-import { DrinkType, DrinkOption } from "@/types";
-import { formatDrinkOption } from "@/utils";
+import { DrinkType, DrinkOption, PreferredUnit } from "@/types";
+import { formatDrinkOption, getDrinkOption } from "@/utils";
 import { ThemedText } from "../ThemedText";
 
 interface DrinkAmountSelectorProps {
@@ -16,6 +16,7 @@ interface DrinkAmountSelectorProps {
   onDrinkNameChange: (name: string) => void;
   onCustomAmountChange: (amount: string) => void;
   onCustomUnitChange: (unit: string) => void;
+  preferredUnit: PreferredUnit;
 }
 
 export const DrinkAmountSelector: React.FC<DrinkAmountSelectorProps> = ({
@@ -28,6 +29,7 @@ export const DrinkAmountSelector: React.FC<DrinkAmountSelectorProps> = ({
   onDrinkNameChange,
   onCustomAmountChange,
   onCustomUnitChange,
+  preferredUnit,
 }) => {
   const { t } = useTranslation();
 
@@ -35,9 +37,7 @@ export const DrinkAmountSelector: React.FC<DrinkAmountSelectorProps> = ({
     <>
       {/* Drink Name Input */}
       <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>
-          {t("drinkName")}
-        </ThemedText>
+        <ThemedText style={styles.sectionTitle}>{t("drinkName")}</ThemedText>
         <TextInput
           style={styles.drinkNameInput}
           placeholder={t("drinkNamePlaceholder")}
@@ -49,31 +49,46 @@ export const DrinkAmountSelector: React.FC<DrinkAmountSelectorProps> = ({
 
       {/* Amount Selector */}
       <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>
-          {t("howMuch")}
-        </ThemedText>
+        <ThemedText style={styles.sectionTitle}>{t("howMuch")}</ThemedText>
 
         {/* Quick Presets */}
         <View style={styles.presetsContainer}>
-          {selectedType.options.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.presetButton,
-                selectedOption === option && styles.selectedPresetButton,
-              ]}
-              onPress={() => onOptionSelect(option)}
-            >
-              <ThemedText
+          {selectedType.options.map((option, index) => {
+            const drinkOption = getDrinkOption(
+              selectedType.id,
+              option.key,
+              preferredUnit === "cl" ? "eu" : "us"
+            );
+            console.log("drinkop", drinkOption);
+            if (!drinkOption) return null;
+            return (
+              <TouchableOpacity
+                key={index}
                 style={[
-                  styles.presetText,
-                  selectedOption === option && styles.selectedPresetText,
+                  styles.presetButton,
+                  selectedOption.key === option.key &&
+                    styles.selectedPresetButton,
                 ]}
+                onPress={() => onOptionSelect(drinkOption)}
               >
-                {formatDrinkOption(option, (key: string) => t(key as any))}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
+                <ThemedText
+                  style={[
+                    styles.presetText,
+                    selectedOption.key === option.key &&
+                      styles.selectedPresetText,
+                  ]}
+                >
+                  {/* {t(drinkOption.key)} ({drinkOption.amount} {drinkOption.unit}) */}
+                  {formatDrinkOption(
+                    drinkOption,
+                    (key: string) => t(key as any),
+                    true,
+                    preferredUnit
+                  )}
+                </ThemedText>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Custom Amount Input */}
@@ -106,7 +121,7 @@ export const DrinkAmountSelector: React.FC<DrinkAmountSelectorProps> = ({
 
 const styles = StyleSheet.create({
   section: {
-    marginVertical: 24,
+    marginVertical: 16,
   },
   sectionTitle: {
     fontSize: 20,

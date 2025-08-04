@@ -3,14 +3,14 @@
 //   drink_option: 'can' | 'bottle' | 'pint' | 'large' | 'glass' | 'large_glass' |
 //                 'standard' | 'strong' | 'double' | 'shot' | 'tall' | 'small' |
 //                 'medium' | 'extra_large';
-//   amount_ml: number;
+//   amount_cl: number;
 //   alcohol_percentage?: number;
 //   timestamp: Date;
 // }
 
 import { UserProfile, DrinkTypeKey } from "@/types";
 import type { DrinkLog } from "@/lib/database/schema";
-import { DRINK_TYPES } from "@/utils/drinks";
+import { drinkTypeDefinitions } from "@/constants/drinks";
 
 export interface DayLog {
   date: Date;
@@ -48,19 +48,21 @@ const fitnessMultipliers = {
 
 /**
  * Calculate alcohol units for a single drink
- * Formula: (volume_ml * ABV * alcohol_density) / 1000
+ * Formula: (volume_cl * ABV * alcohol_density) / 10
  * Uses ethanol density of 0.789 g/ml at 20°C
  */
 export const calculateAlcoholUnits = (drink: DrinkLog): number => {
   const alcoholPercentage =
     drink.alcohol_percentage ||
-    DRINK_TYPES[drink.drink_type]?.alcohol_percentage ||
+    drinkTypeDefinitions[drink.drink_type as keyof typeof drinkTypeDefinitions]
+      ?.alcohol_percentage ||
     5;
 
   // Convert percentage to decimal and calculate pure alcohol mass
-  const alcoholMass = drink.amount_ml * (alcoholPercentage / 100) * 0.789;
+  // Since we're using cl instead of ml, we need to multiply by 10 to get the same result
+  const alcoholMass = drink.amount_cl * (alcoholPercentage / 100) * 0.789;
 
-  return alcoholMass / 10; // Convert to WHO standard units (10g = 1 unit)
+  return alcoholMass; // Convert to WHO standard units (10g = 1 unit)
 };
 
 /**
@@ -313,7 +315,9 @@ export const calculateGlobalScore = (
   if (bingeDays > 4) score -= 3; // Frequent binge drinking
   else if (bingeDays > 0) score -= 1; // Occasional binge drinking
 
-  return Math.max(0, Math.min(10, Math.round(score * 10) / 10));
+  const finalScore = Math.min(10, Math.round(score * 10) / 10);
+  console.log(`Global score calculation: base=${score}, final=${finalScore}, can be negative: ${finalScore < 0}`);
+  return finalScore;
 };
 
 /**
@@ -592,18 +596,18 @@ export const getDrinksForDateRange = (
  * Calculate total alcohol consumption for a list of drinks
  */
 export const calculateTotalConsumption = (drinks: DrinkLog[]) => {
-  let totalMl = 0;
+  let totalCl = 0;
   let totalOz = 0;
   let totalAlcoholUnits = 0;
 
   drinks.forEach((drink) => {
-    totalMl += drink.amount_ml;
-    totalOz += drink.amount_ml * 0.033814;
+    totalCl += drink.amount_cl;
+    totalOz += drink.amount_cl * 0.33814;
     totalAlcoholUnits += calculateAlcoholUnits(drink);
   });
 
   return {
-    total_ml: totalMl,
+    total_cl: totalCl,
     total_oz: totalOz,
     total_alcohol_units: totalAlcoholUnits,
     drink_count: drinks.length,
@@ -626,7 +630,7 @@ export const calculateWeeklyConsumption = (
   startDate: string
 ): {
   date: string;
-  total_ml: number;
+  total_cl: number;
   total_oz: number;
   total_alcohol_units: number;
   drink_count: number;
@@ -994,11 +998,11 @@ export const calculateSimpleLiverScore = (
     0
   );
 
-  console.log(
-    `Simple calculation: ${drinks.length} drinks, ${totalAlcoholUnits.toFixed(
-      2
-    )} units`
-  );
+  // console.log(
+  //   `Simple calculation: ${drinks.length} drinks, ${totalAlcoholUnits.toFixed(
+  //     2
+  //   )} units`
+  // );
 
   // Reference points:
   // 1 bottle wine (750ml at 12.5%) = ~7.4 units
@@ -1038,13 +1042,13 @@ export const calculateSimpleLiverScore = (
   // Linear calculation between 100 (no drinks) and 0 (max capacity)
   let score = 100 - (totalAlcoholUnits / effectiveMaxUnits) * 100;
 
-  // Ensure score stays within 0-100 range
-  const finalScore = Math.max(0, Math.min(100, Math.round(score)));
-  console.log(
-    `Simple calculation result: ${finalScore} (effectiveMaxUnits: ${effectiveMaxUnits.toFixed(
-      2
-    )})`
-  );
+  // Allow score to go negative for cumulative damage
+  const finalScore = Math.min(100, Math.round(score));
+  // console.log(
+  //   `Simple calculation result: ${finalScore} (effectiveMaxUnits: ${effectiveMaxUnits.toFixed(
+  //     2
+  //   )}, can be negative: ${finalScore < 0})`
+  // );
   return finalScore;
 };
 
@@ -1068,14 +1072,16 @@ export const calculateSimpleGlobalScore = (
 ): number => {
   if (dayLogs.length === 0) return 10; // Return 10 on 0-10 scale
 
-  const recentDays = dayLogs.slice(-7); // Last 7 days
+  const recentDays = dayLogs.slice(-30); // Last 30 days for better cumulative assessment
   const dailyScores = recentDays.map(
     (day) => calculateSimpleDailyScore(day.drinks, userProfile) // Use the 0-10 scale function
   );
 
   const averageScore =
     dailyScores.reduce((sum, score) => sum + score, 0) / dailyScores.length;
-  return Math.round(averageScore * 10) / 10; // Round to 1 decimal place
+  const finalScore = Math.round(averageScore * 10) / 10; // Round to 1 decimal place, can be negative
+  console.log(`Simple global score: average=${averageScore}, final=${finalScore}, can be negative: ${finalScore < 0}`);
+  return finalScore;
 };
 
 /**

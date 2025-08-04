@@ -22,7 +22,6 @@ import { UserData } from "@/services/userDataService";
 import { useNewDrinkForm } from "@/hooks/useNewDrinkForm";
 import { DrinkAmountSelector } from "./NewDrinkModal/DrinkAmountSelector";
 import { DrinkTypeSelector } from "./NewDrinkModal/DrinkTypeSelector";
-import { LastNightSlider } from "./NewDrinkModal/LastNightSlider";
 import { TimeSelector } from "./NewDrinkModal/TimeSelector";
 
 interface NewDrinkModalProps {
@@ -72,16 +71,14 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
           return;
         }
 
-        const amountMl = convertUnit(amount, unit as any, "ml");
+        const amountCl = convertUnit(amount, unit as any, "cl");
 
         await createDrinkLog({
           drink_type: formState.selectedType.id as DrinkTypeKey,
           drink_option: formState.selectedOption.key as DrinkOptionKey,
           drink_name: formState.drinkName || undefined,
-          amount_ml: amountMl,
-          timestamp: formState.useCustomTime
-            ? formState.customTime.toISOString()
-            : undefined,
+          amount_cl: amountCl,
+          timestamp: formState.customTime.toISOString(),
           is_approximate: false,
           alcohol_percentage: formState.selectedType.alcohol_percentage,
         });
@@ -119,43 +116,40 @@ export const NewDrinkModal: React.FC<NewDrinkModalProps> = ({
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* Last Night Mode */}
-          {formState.timeMode === "lastNight" && (
+          {/* {formState.timeMode === "lastNight" && (
             <LastNightSlider
               value={formState.sliderValue}
               onChange={actions.setSliderValue}
             />
-          )}
+          )} */}
 
           {/* Normal Mode */}
-          {formState.timeMode !== "lastNight" && (
-            <>
-              <DrinkTypeSelector
-                selectedType={formState.selectedType}
-                onTypeSelect={actions.handleTypeSelect}
-              />
-
-              <DrinkAmountSelector
-                selectedType={formState.selectedType}
-                selectedOption={formState.selectedOption}
-                drinkName={formState.drinkName}
-                customAmount={formState.customAmount}
-                customUnit={formState.customUnit}
-                onOptionSelect={actions.handleOptionSelect}
-                onDrinkNameChange={actions.setDrinkName}
-                onCustomAmountChange={actions.setCustomAmount}
-                onCustomUnitChange={actions.setCustomUnit}
-              />
-            </>
-          )}
-
+          {/* {formState.timeMode !== "lastNight" && (
+            <> */}
           {/* Time Selector */}
           <TimeSelector
-            timeMode={formState.timeMode}
-            useCustomTime={formState.useCustomTime}
             customTime={formState.customTime}
-            onTimeModeChange={actions.handleTimeModeChange}
             onTimeChange={actions.handleTimeChange}
           />
+          <DrinkTypeSelector
+            selectedType={formState.selectedType}
+            onTypeSelect={actions.handleTypeSelect}
+          />
+
+          <DrinkAmountSelector
+            selectedType={formState.selectedType}
+            selectedOption={formState.selectedOption}
+            drinkName={formState.drinkName}
+            customAmount={formState.customAmount}
+            customUnit={formState.customUnit}
+            onOptionSelect={actions.handleOptionSelect}
+            onDrinkNameChange={actions.setDrinkName}
+            onCustomAmountChange={actions.setCustomAmount}
+            onCustomUnitChange={actions.setCustomUnit}
+            preferredUnit={userData.preferred_unit}
+          />
+          {/* </>
+          )} */}
         </ScrollView>
 
         {/* Footer */}
@@ -194,6 +188,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
+    lineHeight: 30,
     fontWeight: "bold",
     color: Colors.light.text,
   },
@@ -210,6 +205,7 @@ const styles = StyleSheet.create({
   },
   closeText: {
     fontSize: 20,
+    lineHeight: 22,
     color: "#666",
     fontWeight: "bold",
   },

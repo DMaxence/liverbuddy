@@ -1,3 +1,5 @@
+import { drinkOptions, drinkTypes, unitTypes } from "@/constants/drinks";
+
 export interface User {
   id: string;
   email: string;
@@ -100,43 +102,31 @@ export interface UserBadge {
 }
 
 export type AppLanguage = "en" | "fr";
-export type PreferredUnit = "ml" | "oz";
+export type PreferredUnit = "cl" | "oz";
 
-// Unit conversion constants
+// Unit conversion constants (updated to use cl instead of ml)
 export const UNIT_CONVERSIONS = {
-  ml: { to_ml: 1, to_oz: 0.033814 },
-  oz: { to_ml: 29.5735, to_oz: 1 },
-  l: { to_ml: 1000, to_oz: 33.814 },
-  drink: { to_ml: 200, to_oz: 6.76 }, // Standard drink = 200ml (6.76 oz)
+  cl: { to_cl: 1, to_oz: 0.33814 },
+  oz: { to_cl: 2.95735, to_oz: 1 },
+  drink: { to_cl: 20, to_oz: 6.76 }, // Standard drink = 20cl (6.76 oz)
 } as const;
 
 export type UnitType = keyof typeof UNIT_CONVERSIONS;
 
 // Drink option keys for better maintainability
-export type DrinkOptionKey =
-  | "can"
-  | "bottle"
-  | "pint"
-  | "large"
-  | "glass"
-  | "large_glass"
-  | "standard"
-  | "strong"
-  | "double"
-  | "shot"
-  | "tall"
-  | "small"
-  | "medium"
-  | "extra_large";
+export type DrinkOptionKey = (typeof drinkOptions)[number];
 
 // Drink type keys
-export type DrinkTypeKey = "beer" | "wine" | "cocktail" | "spirits" | "other";
+export type DrinkTypeKey = (typeof drinkTypes)[number];
+
+// Unit type keys
+export type UnitTypeKey = (typeof unitTypes)[number];
 
 // Generic drink option structure
 export interface DrinkOption {
   key: DrinkOptionKey;
   amount: number;
-  unit: UnitType;
+  unit: UnitTypeKey;
   alcohol_percentage?: number; // Optional for more accurate calculations
 }
 
@@ -157,7 +147,7 @@ export interface DrinkLog {
   drink_type: DrinkTypeKey;
   drink_option: DrinkOptionKey;
   drink_name?: string; // Optional specific drink name (e.g., "IPA", "Merlot", "Margarita")
-  amount_ml: number; // Always stored in mL for consistency
+  amount_cl: number; // Always stored in cl for consistency
   timestamp: string;
   is_approximate?: boolean;
   alcohol_percentage?: number;
@@ -167,11 +157,11 @@ export interface DrinkLog {
 
 // Helper type for drink calculations
 export interface DrinkCalculation {
-  amount_ml: number;
+  amount_cl: number;
   amount_oz: number;
   alcohol_units: number; // Standard alcohol units (10g pure alcohol)
   display_amount: number;
-  display_unit: UnitType;
+  display_unit: UnitTypeKey;
 }
 
 // User profile for medical calculations

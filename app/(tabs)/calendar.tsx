@@ -588,8 +588,8 @@ export default function CalendarScreen() {
                     </ThemedText>
                     <ThemedText style={styles.drinkAmount}>
                       {formatDrinkAmount(
-                        item.amount_ml,
-                        userData?.preferred_unit || "ml"
+                        item.amount_cl,
+                        userData?.preferred_unit || "cl"
                       )}{" "}
                       ({item.drink_option})
                     </ThemedText>

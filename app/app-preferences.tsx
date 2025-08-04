@@ -13,7 +13,7 @@ import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { toast } from "sonner-native";
 
 type WeightUnit = "kg" | "lbs";
-type QuantityUnit = "ml" | "oz";
+type QuantityUnit = "cl" | "oz";
 
 export default function AppPreferencesScreen() {
   const { t } = useTranslation();
@@ -25,7 +25,7 @@ export default function AppPreferencesScreen() {
   // App Preferences
   const [appLanguage, setAppLanguage] = useState<"en" | "fr">(currentLanguage);
   const [weightUnit, setWeightUnit] = useState<WeightUnit>("kg");
-  const [quantityUnit, setQuantityUnit] = useState<QuantityUnit>("ml");
+  const [quantityUnit, setQuantityUnit] = useState<QuantityUnit>("cl");
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -35,7 +35,7 @@ export default function AppPreferencesScreen() {
       if (preferences) {
         setAppLanguage(preferences.app_language || currentLanguage);
         setWeightUnit(preferences.weight_unit || "kg");
-        setQuantityUnit(preferences.preferred_unit || "ml");
+        setQuantityUnit(preferences.preferred_unit || "cl");
       }
     } catch (error) {
       console.error("Error loading preferences:", error);
@@ -153,7 +153,7 @@ export default function AppPreferencesScreen() {
               t("quantityUnit"),
               renderPillSelector(
                 [
-                  { value: "ml" as QuantityUnit, label: t("milliliters") },
+                  { value: "cl" as QuantityUnit, label: t("centiliters") },
                   { value: "oz" as QuantityUnit, label: t("ounces") },
                 ],
                 quantityUnit,

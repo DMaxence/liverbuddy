@@ -2,7 +2,7 @@
   "expo": {
     "name": "Liver Buddy",
     "slug": "liverbuddy",
-    "version": "0.0.18",
+    "version": "0.0.20",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "liverbuddy",
@@ -39,7 +39,32 @@
         }
       ],
       "expo-localization",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "@howincodes/expo-dynamic-app-icon",
+        {
+          "liver-level-2": {
+            "ios": "./assets/images/icon-level-2.png",
+            "android": "./assets/images/icon-level-2.png"
+          },
+          "liver-level-3": {
+            "ios": "./assets/images/icon-level-3.png",
+            "android": "./assets/images/icon-level-3.png"
+          },
+          "liver-level-4": {
+            "ios": "./assets/images/icon-level-4.png",
+            "android": "./assets/images/icon-level-4.png"
+          },
+          "liver-level-5": {
+            "ios": "./assets/images/icon-level-5.png",
+            "android": "./assets/images/icon-level-5.png"
+          },
+          "liver-level-6": {
+            "ios": "./assets/images/icon-level-6.png",
+            "android": "./assets/images/icon-level-6.png"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

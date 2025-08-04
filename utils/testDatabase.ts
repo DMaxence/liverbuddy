@@ -13,7 +13,7 @@ export const addSampleData = async () => {
       favorite_drink_type: 'beer' as DrinkTypeKey,
       favorite_drink_option: 'pint' as DrinkOptionKey,
       favorite_drink: 'IPA',
-      preferred_unit: 'ml',
+      preferred_unit: 'cl',
       weekly_goal: 7,
     });
     console.log('✅ User preferences added');
@@ -24,7 +24,7 @@ export const addSampleData = async () => {
         drink_type: 'beer' as DrinkTypeKey,
         drink_option: 'pint' as DrinkOptionKey,
         drink_name: 'IPA',
-        amount_ml: 473, // 16 oz pint
+        amount_cl: 47.3, // 16 oz pint
         timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
         alcohol_percentage: 6.5,
       },
@@ -32,7 +32,7 @@ export const addSampleData = async () => {
         drink_type: 'wine' as DrinkTypeKey,
         drink_option: 'glass' as DrinkOptionKey,
         drink_name: 'Merlot',
-        amount_ml: 148, // 5 oz glass
+        amount_cl: 14.8, // 5 oz glass
         timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
         alcohol_percentage: 13.5,
       },
@@ -40,7 +40,7 @@ export const addSampleData = async () => {
         drink_type: 'cocktail' as DrinkTypeKey,
         drink_option: 'standard' as DrinkOptionKey,
         drink_name: 'Margarita',
-        amount_ml: 200, // Standard cocktail
+        amount_cl: 20, // Standard cocktail
         timestamp: new Date().toISOString(), // Today
         alcohol_percentage: 15,
       },

@@ -57,7 +57,7 @@ export const DrinkTypeSelector: React.FC<DrinkTypeSelectorProps> = ({
 
 const styles = StyleSheet.create({
   section: {
-    marginVertical: 24,
+    marginVertical: 16,
   },
   sectionTitle: {
     fontSize: 20,

@@ -176,8 +176,8 @@ export default function LogsScreen() {
               <ThemedText style={styles.logName}>
                 {item.drink_name || t(item.drink_type)} -{" "}
                 {formatDrinkAmount(
-                  item.amount_ml,
-                  userData?.preferred_unit || "ml"
+                  item.amount_cl,
+                  userData?.preferred_unit || "cl"
                 )}
               </ThemedText>
               <ThemedText style={styles.logTime}>
@@ -253,8 +253,8 @@ export default function LogsScreen() {
             <ThemedText style={styles.logName}>
               {item.drink_name || t(item.drink_type)} -{" "}
               {formatDrinkAmount(
-                item.amount_ml,
-                userData?.preferred_unit || "ml"
+                item.amount_cl,
+                userData?.preferred_unit || "cl"
               )}
             </ThemedText>
             <ThemedText style={styles.logTime}>

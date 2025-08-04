@@ -13,6 +13,7 @@ import { NewDrinkModal } from "@/components/NewDrinkModal";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
+import { useAppIcon } from "@/hooks/useAppIcon";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useUser } from "@/hooks/useUser";
 import { createDrinkLog } from "@/services/drinkService";
@@ -22,10 +23,8 @@ import { getMostRecentDrink, isWithinLastHour } from "@/utils/dateUtils";
 import { getDrinkTypeEmoji } from "@/utils/drinks";
 import { formatDrinkAmount } from "@/utils/formatDrinkAmount";
 import {
-  formatDate,
   formatRelativeTime,
   formatTime,
-  getGreeting,
   getQuickAddButtonText,
 } from "@/utils/mockData";
 import { toast } from "sonner-native";
@@ -49,14 +48,15 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const baseLiverState = getLiverStateByScore(userData?.healthScore ?? 100);
   const liverState = getLocalizedLiverState(baseLiverState, t);
-  const progressPercentage = ((userData?.healthScore ?? 100) / 100) * 100;
+  const healthScore = userData?.healthScore ?? 100;
+  const progressPercentage = Math.max(0, (healthScore / 100) * 100);
 
-  const greeting = getGreeting(language);
-  const currentDate = formatDate(new Date(), language);
+  // Automatically update app icon when health score changes
+  useAppIcon(userData?.healthScore ?? 100);
 
   const handleLogDrink = () => {
-    const { mode } = getQuickAddButtonText(userData, language);
-    setModalMode(mode);
+    // const { mode } = getQuickAddButtonText(userData, language);
+    setModalMode("normal");
     setIsModalVisible(true);
   };
 
@@ -97,7 +97,7 @@ export default function HomeScreen() {
         drink_type: recentDrinkWithinHour.drink_type,
         drink_option: recentDrinkWithinHour.drink_option,
         drink_name: recentDrinkWithinHour.drink_name,
-        amount_ml: recentDrinkWithinHour.amount_ml,
+        amount_cl: recentDrinkWithinHour.amount_cl,
         alcohol_percentage: recentDrinkWithinHour.alcohol_percentage,
       });
 
@@ -105,8 +105,8 @@ export default function HomeScreen() {
       const drinkName =
         recentDrinkWithinHour.drink_name || t(recentDrinkWithinHour.drink_type);
       const amount = formatDrinkAmount(
-        recentDrinkWithinHour.amount_ml,
-        userData?.preferred_unit || "ml"
+        recentDrinkWithinHour.amount_cl,
+        userData?.preferred_unit || "cl"
       );
       toast.success(`${t("drinkAddedToast")} ${amount} ${drinkName} 🍺`, {
         description: t("drinkAddedSuccess"),
@@ -147,7 +147,14 @@ export default function HomeScreen() {
             resizeMode="contain"
           />
           <ThemedText style={styles.healthScore}>
-            {Math.round(userData?.healthScore ?? 100)}
+            {healthScore < 0 ? (
+              <ThemedText style={styles.negativeScore}>
+                {" "}
+                ({Math.round(healthScore)})
+              </ThemedText>
+            ) : (
+              Math.round(healthScore)
+            )}
           </ThemedText>
           <ThemedView style={styles.progressBarContainer}>
             <View
@@ -227,8 +234,8 @@ export default function HomeScreen() {
             <ThemedText style={styles.quickRepeatButtonText}>
               {`${t("add")} `}
               {formatDrinkAmount(
-                recentDrinkWithinHour.amount_ml,
-                userData?.preferred_unit || "ml"
+                recentDrinkWithinHour.amount_cl,
+                userData?.preferred_unit || "cl"
               )}
               {` ${t("of")} `}
               {recentDrinkWithinHour.drink_name ||
@@ -258,8 +265,8 @@ export default function HomeScreen() {
                       <ThemedText style={styles.logName}>
                         {drink.drink_name || t(drink.drink_type)} -{" "}
                         {formatDrinkAmount(
-                          drink.amount_ml,
-                          userData?.preferred_unit || "ml"
+                          drink.amount_cl,
+                          userData?.preferred_unit || "cl"
                         )}
                       </ThemedText>
                       <ThemedText style={styles.logTime}>
@@ -369,6 +376,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#11181C",
     marginBottom: 10,
+  },
+  negativeScore: {
+    fontSize: 24,
+    lineHeight: 24,
+    fontWeight: "bold",
+    color: "#FF4444",
   },
   progressBarContainer: {
     width: "80%",

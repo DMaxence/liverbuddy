@@ -7,21 +7,21 @@ import { useFonts } from "expo-font";
 import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { Toaster } from "sonner-native";
 import "react-native-reanimated";
+import { Toaster } from "sonner-native";
 
+import { ThemedText } from "@/components/ThemedText";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Colors } from "@/constants/Colors";
 import { useAuth } from "@/hooks/useAuth";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useDatabase } from "@/hooks/useDatabase";
+import { useTranslation } from "@/hooks/useTranslation";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { TouchableOpacity } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useTranslation } from "@/hooks/useTranslation";
-import { Colors } from "@/constants/Colors";
-import { TouchableOpacity } from "react-native";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import { ThemedText } from "@/components/ThemedText";
 
 function AppInitializer() {
   const { initializeAuth } = useAuth();

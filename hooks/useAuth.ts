@@ -10,6 +10,7 @@ import {
 } from "@/services/supabase";
 import { useAuthStore } from "@/stores/authStore";
 import { User } from "@/types";
+import { storeBetaUser } from "@/utils/beta";
 import { userMetadata } from "@/utils/device";
 import { logNewAnonymousUser } from "@/utils/logsnag";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -74,6 +75,7 @@ export const useAuth = () => {
               setUser(profile);
               // Update user metadata when app opens
               await updateUserProfile(user.id, userMetadata);
+              await storeBetaUser(user.id);
             } else {
               console.error("User exists but no profile found:", user.id);
               setError("Profile not found");
