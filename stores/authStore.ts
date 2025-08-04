@@ -13,7 +13,9 @@ interface AuthState {
 
 interface AuthActions {
   setUser: (user: User | null) => void;
-  updateUser: (userUpdates: Partial<Database["public"]["Tables"]["profiles"]["Update"]>) => void;
+  updateUser: (
+    userUpdates: Partial<Database["public"]["Tables"]["profiles"]["Update"]>
+  ) => void;
   setSession: (session: any | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -33,7 +35,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       setUser: (user) => set({ user }),
       updateUser: (userUpdates) =>
         set((state) => ({
-          user: state.user ? { ...state.user, ...userUpdates } as User : null,
+          user: state.user ? ({ ...state.user, ...userUpdates } as User) : null,
         })),
       setSession: (session) => set({ session }),
       setLoading: (isLoading) => set({ isLoading }),
@@ -54,4 +56,5 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 // Computed selectors
 export const useIsAuthenticated = () => useAuthStore((state) => !!state.user);
 export const useUser = () => useAuthStore((state) => state.user);
+export const useSession = () => useAuthStore((state) => state.session);
 export const useUpdateUser = () => useAuthStore((state) => state.updateUser);

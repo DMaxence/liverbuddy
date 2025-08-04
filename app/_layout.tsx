@@ -137,9 +137,9 @@ function RootLayoutContent() {
                 }}
               />
               <Stack.Screen
-                name="support"
+                name="infos"
                 options={{
-                  title: t("support"),
+                  title: t("infos"),
                   headerLeft: () => (
                     <TouchableOpacity
                       style={{ flexDirection: "row", alignItems: "center" }}

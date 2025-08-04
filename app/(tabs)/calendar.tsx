@@ -28,7 +28,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Modal,
 } from "react-native";
+import { getLocalizedLiverState } from "@/types";
 
 // Import all liver images statically
 const liverImages = {
@@ -64,6 +66,8 @@ export default function CalendarScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isLiverDetailModalVisible, setIsLiverDetailModalVisible] =
+    useState(false);
 
   const { date } = useLocalSearchParams();
 
@@ -502,7 +506,10 @@ export default function CalendarScreen() {
                   )}
                 </ThemedText>
                 {selectedDay && (
-                  <View style={styles.liverScoreContainer}>
+                  <TouchableOpacity
+                    style={styles.liverScoreContainer}
+                    onPress={() => setIsLiverDetailModalVisible(true)}
+                  >
                     <Image
                       source={
                         liverImages[
@@ -515,7 +522,7 @@ export default function CalendarScreen() {
                     <ThemedText style={styles.liverScoreText}>
                       {selectedDay.healthScore ?? 100}/100
                     </ThemedText>
-                  </View>
+                  </TouchableOpacity>
                 )}
               </View>
             </View>
@@ -542,7 +549,10 @@ export default function CalendarScreen() {
                     {section.title}
                   </ThemedText>
                   {selectedDay && (
-                    <View style={styles.liverScoreContainer}>
+                    <TouchableOpacity
+                      style={styles.liverScoreContainer}
+                      onPress={() => setIsLiverDetailModalVisible(true)}
+                    >
                       <Image
                         source={
                           liverImages[
@@ -555,7 +565,7 @@ export default function CalendarScreen() {
                       <ThemedText style={styles.liverScoreText}>
                         {selectedDay.healthScore ?? 100}/100
                       </ThemedText>
-                    </View>
+                    </TouchableOpacity>
                   )}
                 </View>
               </View>
@@ -605,6 +615,55 @@ export default function CalendarScreen() {
           />
         )}
       </BottomSheetModal>
+
+      {/* Liver Detail Modal */}
+      <Modal
+        visible={isLiverDetailModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsLiverDetailModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeaderBar} />
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>Liver Health</ThemedText>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setIsLiverDetailModalVisible(false)}
+              >
+                <ThemedText style={styles.closeButtonText}>×</ThemedText>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.modalBody}>
+              {selectedDay && (
+                <View style={styles.liverDetailContainer}>
+                  <Image
+                    source={
+                      liverImages[
+                        selectedDay.liverState as keyof typeof liverImages
+                      ]
+                    }
+                    style={styles.liverDetailImage}
+                    resizeMode="contain"
+                  />
+                  <ThemedText style={styles.liverDetailScoreText}>
+                    {selectedDay.healthScore ?? 100}/100
+                  </ThemedText>
+                  <ThemedText style={styles.liverDetailText}>
+                    {
+                      getLocalizedLiverState(
+                        getLiverStateByScore(selectedDay.healthScore),
+                        t
+                      ).description
+                    }
+                  </ThemedText>
+                </View>
+              )}
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -751,7 +810,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -764,20 +823,19 @@ const styles = StyleSheet.create({
     minHeight: 200,
   },
   modalHeaderBar: {
-    width: 50,
+    width: 40,
     height: 4,
-    backgroundColor: "#11181C",
-    borderRadius: 10,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 2,
     alignSelf: "center",
-    marginBottom: 10,
-    marginTop: 10,
+    marginBottom: 20,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 20,
     marginBottom: 20,
-    backgroundColor: "red",
   },
   modalTitle: {
     fontSize: 18,
@@ -789,11 +847,15 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   closeButtonText: {
-    fontSize: 20,
+    fontSize: 24,
+    fontWeight: "bold",
     color: "#666",
   },
   modalBody: {
     maxHeight: 300,
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
   },
   emptyStateContainer: {
     paddingVertical: 40,
@@ -876,5 +938,26 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     color: "#666",
+  },
+  liverDetailText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  liverDetailContainer: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  liverDetailImage: {
+    width: 120,
+    height: 120,
+    marginBottom: 16,
+  },
+  liverDetailScoreText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#11181C",
+    marginBottom: 16,
   },
 });

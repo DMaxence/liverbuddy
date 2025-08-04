@@ -43,59 +43,31 @@ export interface Database {
           updated_at?: string;
           app_lang?: string;
         };
-      };
-      badges: {
+      },
+      feedback: {
         Row: {
           id: string;
-          name: string;
+          title: string;
           description: string;
-          icon: string;
-          requirement_type: "drinks_consumed";
-          requirement_value: number;
-          xp_reward: number;
+          rating: number;
           created_at: string;
+          user_id: string;
         };
         Insert: {
-          id?: string;
-          name: string;
+          title: string;
           description: string;
-          icon: string;
-          requirement_type: "drinks_consumed";
-          requirement_value: number;
-          xp_reward: number;
+          rating: number;
+          user_id: string;
           created_at?: string;
         };
         Update: {
-          id?: string;
-          name?: string;
+          title?: string;
           description?: string;
-          icon?: string;
-          requirement_type?: "drinks_consumed";
-          requirement_value?: number;
-          xp_reward?: number;
+          rating?: number;
+          user_id?: string;
           created_at?: string;
         };
-      };
-      user_badges: {
-        Row: {
-          id: string;
-          user_id: string;
-          badge_id: string;
-          earned_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          badge_id: string;
-          earned_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          badge_id?: string;
-          earned_at?: string;
-        };
-      };
+      },
     };
   };
 }

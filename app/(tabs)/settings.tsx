@@ -43,12 +43,12 @@ export default function SettingsScreen() {
 
   const supportSettings = [
     {
-      id: "support",
-      title: t("support"),
-      subtitle: t("supportSubtitle"),
+      id: "infos",
+      title: t("infos"),
+      subtitle: t("infosSubtitle"),
       icon: "questionmark.circle.fill",
       emoji: "❓",
-      route: "/support",
+      route: "/infos",
     },
   ];
 

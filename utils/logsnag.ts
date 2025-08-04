@@ -34,3 +34,27 @@ export const logNewUser = (userId: string, provider: string) => {
     },
   });
 };
+
+export const logFeedback = (
+  userId: string,
+  {
+    title,
+    description,
+    rating,
+  }: { title: string; description: string; rating: number }
+) => {
+  logsnag.track({
+    channel: "feedback",
+    event: "Feedback",
+    user_id: userId,
+    icon: "💬",
+    notify: true,
+    tags: {
+      time: new Date().toISOString(),
+      ...userMetadata,
+      title,
+      description,
+      rating,
+    },
+  });
+};

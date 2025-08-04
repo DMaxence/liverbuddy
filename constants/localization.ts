@@ -247,7 +247,23 @@ export const translations = {
 
     // Support Page
     support: "Support",
-    supportSubtitle: "Learn how your liver health score is calculated",
+    supportSubtitle: "Get support from the team",
+
+    //infos page
+    infos: "Infos",
+    infosSubtitle: "Learn how your liver health score is calculated",
+
+    // Feedback
+    feedback: "Feedback",
+    feedbackTitle: "Title",
+    feedbackDescription: "Description",
+    feedbackRating: "Do you like the app?",
+    feedbackSubmit: "Submit Feedback",
+    feedbackCancel: "Cancel",
+    feedbackSuccess: "Thank you for your feedback!",
+    feedbackError: "Failed to submit feedback",
+    feedbackTitlePlaceholder: "Enter feedback title...",
+    feedbackDescriptionPlaceholder: "Tell us what you think...",
     howScoringWorks: "How Scoring Works",
     howScoringWorksDescription:
       "Your liver health score is calculated using medical research and your personal drinking patterns. The score ranges from 0-10, where 10 is excellent liver health and 0 indicates critical stress.",
@@ -590,8 +606,13 @@ export const translations = {
 
     // Support Page
     support: "Support",
-    supportSubtitle:
+    supportSubtitle: "Obtenez de l'aide de l'équipe",
+
+    // infos page
+    infos: "Infos",
+    infosSubtitle:
       "Découvrez comment votre score de santé hépatique est calculé",
+
     howScoringWorks: "Comment Fonctionne le Score",
     howScoringWorksDescription:
       "Votre score de santé hépatique est calculé en utilisant la recherche médicale et vos habitudes de consommation personnelles. Le score varie de 0 à 10, où 10 est une excellente santé hépatique et 0 indique un stress critique.",
@@ -714,6 +735,18 @@ export const translations = {
     sources: "Sources",
     sourcesDescription:
       "Nos calculs sont basés sur les sources médicales et recherches suivantes :",
+
+    // Feedback
+    feedback: "Feedback",
+    feedbackTitle: "Titre",
+    feedbackDescription: "Description",
+    feedbackRating: "Aimez-vous l'application ?",
+    feedbackSubmit: "Envoyer le feedback",
+    feedbackCancel: "Annuler",
+    feedbackSuccess: "Merci pour votre feedback !",
+    feedbackError: "Échec de l'envoi du feedback",
+    feedbackTitlePlaceholder: "Entrez le titre du feedback...",
+    feedbackDescriptionPlaceholder: "Dites-nous ce que vous pensez...",
   },
 } as const;
 
