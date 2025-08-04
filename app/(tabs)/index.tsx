@@ -8,10 +8,12 @@ import {
   View,
 } from "react-native";
 
+import { FeedbackModal } from "@/components/FeedbackModal";
 import { MiniCalendar } from "@/components/MiniCalendar";
 import { NewDrinkModal } from "@/components/NewDrinkModal";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Colors } from "@/constants/Colors";
 import { useAppIcon } from "@/hooks/useAppIcon";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -43,6 +45,7 @@ const liverImages = {
 export default function HomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState<"normal" | "lastNight">("normal");
+  const [isFeedbackVisible, setIsFeedbackVisible] = useState(false);
   const { userData } = useUser("local-user");
   const language = useLanguage();
   const { t } = useTranslation();
@@ -128,14 +131,20 @@ export default function HomeScreen() {
         {/* Header */}
         <ThemedView style={styles.header}>
           <ThemedText style={styles.appTitle}>{t("appTitle")}</ThemedText>
-          {/* <View style={styles.headerLeft}>
-          </View> */}
-          {/* <TouchableOpacity
-            style={styles.settingsButton}
-            onPress={handleSettingsPress}
+          <TouchableOpacity
+            style={styles.feedbackButton}
+            onPress={() => setIsFeedbackVisible(true)}
+            activeOpacity={0.8}
           >
-            <ThemedText style={styles.settingsIcon}>⚙️</ThemedText>
-          </TouchableOpacity> */}
+            {/* <ThemedText style={styles.feedbackButtonText}>
+              {t("feedback")}
+            </ThemedText> */}
+            <IconSymbol
+              name="hand.thumbsup.circle.fill"
+              color="rgba(20,20,20,0.5)"
+              size={28}
+            />
+          </TouchableOpacity>
         </ThemedView>
 
         {/* Liver Avatar & Health Score */}
@@ -304,6 +313,12 @@ export default function HomeScreen() {
           initialMode={modalMode}
         />
       )}
+      {userData?.id && (
+        <FeedbackModal
+          visible={isFeedbackVisible}
+          onClose={() => setIsFeedbackVisible(false)}
+        />
+      )}
     </ThemedView>
   );
 }
@@ -320,20 +335,23 @@ const styles = StyleSheet.create({
   header: {
     // flexDirection: "row",
     // justifyContent: "space-between",
-    // alignItems: "flex-start",
-    marginTop: 60,
+    // alignItems: "center",
+    marginTop: 40,
     marginBottom: 20,
   },
   headerLeft: {
     flex: 1,
   },
   appTitle: {
+    marginTop: 6,
     fontSize: 32,
-    lineHeight: 32,
+    lineHeight: 36,
     fontWeight: "bold",
     color: "#11181C",
     marginBottom: 4,
     textAlign: "center",
+    // alignSelf: "center",
+    // marginHorizontal: 'auto'
   },
   greeting: {
     fontSize: 18,
@@ -576,5 +594,21 @@ const styles = StyleSheet.create({
   quickRepeatButtonText: {
     fontSize: 16,
     fontWeight: "600",
+  },
+  feedbackButton: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    backgroundColor: "rgba(20,20,20,0.1)",
+    borderRadius: 24,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  feedbackButtonText: {
+    color: "rgba(20,20,20,0.5)",
+    fontSize: 14,
   },
 });

@@ -21,8 +21,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 // Database table names
 export const TABLES = {
   PROFILES: "profiles",
-  BADGES: "badges",
-  USER_BADGES: "user_badges",
+  FEEDBACK: "feedback",
 } as const;
 
 // Auth helpers
@@ -142,4 +141,25 @@ export const onAuthStateChange = (
   callback: (event: string, session: any) => void
 ) => {
   return supabase.auth.onAuthStateChange(callback);
+};
+
+export const createFeedback = async ({
+  title,
+  description,
+  rating,
+  user_id,
+}: {
+  title: string;
+  description: string;
+  rating: number;
+  user_id: string;
+}) => {
+  const { data, error } = await supabase
+    .from(TABLES.FEEDBACK)
+    .insert([
+      { title, description, rating, user_id },
+    ])
+    .select()
+    .single();
+  return { data, error };
 };
