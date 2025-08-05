@@ -30,6 +30,7 @@ import {
   getQuickAddButtonText,
 } from "@/utils/mockData";
 import { toast } from "sonner-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Import all liver images statically
 const shadow = require("@/assets/images/shadow.png");
@@ -53,6 +54,7 @@ export default function HomeScreen() {
   const liverState = getLocalizedLiverState(baseLiverState, t);
   const healthScore = userData?.healthScore ?? 100;
   const progressPercentage = Math.max(0, (healthScore / 100) * 100);
+  const insets = useSafeAreaInsets();
 
   // Automatically update app icon when health score changes
   useAppIcon(userData?.healthScore ?? 100);
@@ -129,10 +131,10 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <ThemedView style={styles.header}>
+        <ThemedView style={[styles.header, { paddingTop: insets.top }]}>
           <ThemedText style={styles.appTitle}>{t("appTitle")}</ThemedText>
           <TouchableOpacity
-            style={styles.feedbackButton}
+            style={[styles.feedbackButton, { top: insets.top }]}
             onPress={() => setIsFeedbackVisible(true)}
             activeOpacity={0.8}
           >
@@ -336,7 +338,7 @@ const styles = StyleSheet.create({
     // flexDirection: "row",
     // justifyContent: "space-between",
     // alignItems: "center",
-    marginTop: 40,
+    // marginTop: 40,
     marginBottom: 20,
   },
   headerLeft: {
@@ -598,7 +600,6 @@ const styles = StyleSheet.create({
   feedbackButton: {
     position: "absolute",
     right: 0,
-    top: 0,
     backgroundColor: "rgba(20,20,20,0.1)",
     borderRadius: 24,
     paddingHorizontal: 8,

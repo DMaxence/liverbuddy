@@ -1,19 +1,13 @@
 import { useUser } from "@/hooks/useUser";
-import { getQuickAddButtonText } from "@/utils/mockData";
 import { useState } from "react";
-import { NewDrinkModal } from "./NewDrinkModal";
 import { FloatingActionButton } from "./FloatingActionButton";
-import { useLanguage } from "@/stores/uiStore";
+import { NewDrinkModal } from "./NewDrinkModal";
 
 export const DrinkModal = () => {
   const { userData } = useUser("local-user");
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalMode, setModalMode] = useState<"normal" | "lastNight">("normal");
-  const language = useLanguage();
 
   const handleLogDrink = () => {
-    const { mode } = getQuickAddButtonText(userData, language);
-    setModalMode(mode);
     setIsModalVisible(true);
   };
 
@@ -29,7 +23,6 @@ export const DrinkModal = () => {
           userData={userData}
           visible={isModalVisible}
           onClose={handleCloseModal}
-          initialMode={modalMode}
         />
       )}
     </>
