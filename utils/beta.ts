@@ -11,3 +11,8 @@ export const storeBetaUser = async (userId: string) => {
   }
   await AsyncStorage.setItem("beta_user_id", userId);
 };
+
+export const isBetaUser = async (userId: string) => {
+  const isBeta = await AsyncStorage.getItem("beta_user_id");
+  return isBeta === userId;
+};
