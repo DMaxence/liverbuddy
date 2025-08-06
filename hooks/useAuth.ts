@@ -55,31 +55,25 @@ export const useAuth = () => {
         }
 
         if (user) {
-          const isAnonymous = user.is_anonymous;
           setSession(session);
+          const { data: profile, error: profileError } = await getUserProfile(
+            user.id
+          );
 
-          if (isAnonymous) {
-            setUser(null);
+          if (profileError) {
+            console.error("Profile error:", profileError);
+            setError(profileError.message);
+            return;
+          }
+
+          if (profile) {
+            setUser(profile);
+            // Update user metadata when app opens
+            await updateUserProfile(user.id, userMetadata);
+            await storeBetaUser(user.id);
           } else {
-            const { data: profile, error: profileError } = await getUserProfile(
-              user.id
-            );
-
-            if (profileError) {
-              console.error("Profile error:", profileError);
-              setError(profileError.message);
-              return;
-            }
-
-            if (profile) {
-              setUser(profile);
-              // Update user metadata when app opens
-              await updateUserProfile(user.id, userMetadata);
-              await storeBetaUser(user.id);
-            } else {
-              console.error("User exists but no profile found:", user.id);
-              setError("Profile not found");
-            }
+            console.error("User exists but no profile found:", user.id);
+            setError("Profile not found");
           }
         }
       } else {
