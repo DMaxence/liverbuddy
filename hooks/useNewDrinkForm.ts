@@ -69,7 +69,7 @@ export const useNewDrinkForm = (
       selectedOption: getSelectedOption(),
       drinkName: userData?.favorite_drink || "",
       customAmount: "",
-      customUnit: "",
+      customUnit: userData?.preferred_unit || "",
       useCustomTime: false,
       customTime: new Date(),
       timeMode: initialMode === "lastNight" ? "lastNight" : "now",
@@ -79,6 +79,7 @@ export const useNewDrinkForm = (
       getSelectedDrinkType,
       getSelectedOption,
       userData?.favorite_drink,
+      userData?.preferred_unit,
       initialMode,
     ]
   );

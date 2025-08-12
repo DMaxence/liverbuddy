@@ -1,8 +1,27 @@
-# Welcome to your Expo app 👋
+# LiverBuddy
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+LiverBuddy helps you track your drinks in real time, estimate your blood alcohol concentration (BAC), and stay within safe limits. It offers quick logging, custom drink presets, reminders, and helpful insights to encourage healthier habits.
 
-## Get started
+![Simulator Screen 1](assets/images/simulator-screen-1.png)
+![Simulator Screen 2](assets/images/simulator-screen-2.png)
+
+[Testflight](https://testflight.apple.com/join/QBg5ckvN)
+
+## Features
+
+- Quick-add drinks with amount and ABV presets
+- BAC estimation over time with metabolism and body metrics
+- Simple daily goals and streaks
+- Insights: units per day/week, drink history
+- Local-first storage with optional backups (planned)
+
+## Tech
+
+- Expo (React Native, Expo Router)
+- TypeScript
+- Zustand for state management
+
+## Getting started
 
 1. Install dependencies
 
@@ -10,41 +29,34 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
-2. Start the app
+2. Start the app (choose simulator or device in the prompt)
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. Open on:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   - iOS Simulator (press i)
+   - Android Emulator (press a)
+   - Expo Go on a device (scan QR)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Project source lives in the `app` directory and uses file-based routing.
 
-## Get a fresh project
-
-When you're ready, run:
+## Development scripts
 
 ```bash
-npm run reset-project
+npm run lint     # Lint code
+npm run typecheck# TypeScript checks
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Screenshots
 
-## Learn more
+The screenshots above are stored at:
 
-To learn more about developing your project with Expo, look at the following resources:
+- `assets/images/simulator-screen-1.png`
+- `assets/images/simulator-screen-2.png`
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## License
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+MIT

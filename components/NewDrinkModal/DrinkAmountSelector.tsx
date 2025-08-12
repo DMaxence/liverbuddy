@@ -105,13 +105,7 @@ export const DrinkAmountSelector: React.FC<DrinkAmountSelectorProps> = ({
               keyboardType="numeric"
               placeholderTextColor="#999"
             />
-            <TextInput
-              style={styles.unitInput}
-              placeholder={t("unit")}
-              value={customUnit}
-              onChangeText={onCustomUnitChange}
-              placeholderTextColor="#999"
-            />
+            <ThemedText>{preferredUnit}</ThemedText>
           </View>
         </View>
       </View>
@@ -177,6 +171,7 @@ const styles = StyleSheet.create({
   },
   customInputRow: {
     flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   amountInput: {
