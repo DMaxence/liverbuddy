@@ -2,8 +2,11 @@
 
 LiverBuddy helps you track your drinks in real time, estimate your blood alcohol concentration (BAC), and stay within safe limits. It offers quick logging, custom drink presets, reminders, and helpful insights to encourage healthier habits.
 
-![Simulator Screen 1](assets/images/simulator-screen-1.png)
-![Simulator Screen 2](assets/images/simulator-screen-2.png)
+<p align="center">
+  <img src="assets/images/simulator-screen-1.png" alt="Simulator Screen 1" width="300" style="margin-right: 8px;" />
+  <img src="assets/images/simulator-screen-2.png" alt="Simulator Screen 2" width="300" />
+  
+</p>
 
 [Testflight](https://testflight.apple.com/join/QBg5ckvN)
 
